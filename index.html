@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Jen's Card Strategy</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --x5-bg: #0a2e1a;
+    --x5-accent: #22c55e;
+    --x5-light: #dcfce7;
+    --x5-mid: #16a34a;
+
+    --strata-bg: #1a1240;
+    --strata-accent: #a78bfa;
+    --strata-light: #ede9fe;
+    --strata-mid: #7c3aed;
+
+    --chase-bg: #0c1f3d;
+    --chase-accent: #60a5fa;
+    --chase-light: #dbeafe;
+    --chase-mid: #2563eb;
+
+    --qs-bg: #2a1500;
+    --qs-accent: #fb923c;
+    --qs-light: #ffedd5;
+    --qs-mid: #ea580c;
+
+    --bg: #0f0f0f;
+    --surface: #1a1a1a;
+    --border: rgba(255,255,255,0.08);
+    --text: #f5f5f5;
+    --muted: #888;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding: 0 0 80px;
+  }
+
+  .app-header {
+    padding: 28px 20px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .app-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--text);
+  }
+
+  .app-subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+    font-weight: 300;
+  }
+
+  .rule-bar {
+    background: #1c1c1c;
+    border: 1px solid #2a2a2a;
+    border-radius: 10px;
+    margin: 16px 20px 0;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: #aaa;
+    line-height: 1.5;
+  }
+
+  .rule-bar strong { color: var(--text); font-weight: 500; }
+
+  .cards-list { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+
+  .card-section {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    cursor: pointer;
+    user-select: none;
+    transition: opacity 0.15s;
+  }
+  .card-header:active { opacity: 0.8; }
+
+  .card-icon {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .card-info { flex: 1; }
+  .card-name { font-size: 15px; font-weight: 600; line-height: 1.2; }
+  .card-role { font-size: 12px; font-weight: 300; margin-top: 2px; opacity: 0.75; }
+
+  .chevron {
+    font-size: 18px;
+    opacity: 0.5;
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+  }
+  .card-section.open .chevron { transform: rotate(180deg); }
+
+  .card-body {
+    display: none;
+    padding: 0 14px 14px;
+  }
+  .card-section.open .card-body { display: block; }
+
+  .cat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    gap: 8px;
+  }
+  .cat-row:last-child { border-bottom: none; }
+
+  .cat-name { font-size: 14px; color: #ccc; font-weight: 400; flex: 1; }
+  .cat-rate { font-size: 14px; font-weight: 600; white-space: nowrap; }
+
+  .note-chip {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-top: 10px;
+    display: inline-block;
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  /* X5 */
+  .card-x5 .card-header { background: var(--x5-bg); }
+  .card-x5 .card-icon { background: rgba(34,197,94,0.15); }
+  .card-x5 .card-name { color: var(--x5-accent); }
+  .card-x5 .card-role { color: #86efac; }
+  .card-x5 .card-body { background: #0d2218; }
+  .card-x5 .cat-rate { color: var(--x5-accent); }
+  .card-x5 .note-chip { background: rgba(34,197,94,0.12); color: #86efac; }
+
+  /* Strata */
+  .card-strata .card-header { background: var(--strata-bg); }
+  .card-strata .card-icon { background: rgba(167,139,250,0.15); }
+  .card-strata .card-name { color: var(--strata-accent); }
+  .card-strata .card-role { color: #c4b5fd; }
+  .card-strata .card-body { background: #150f36; }
+  .card-strata .cat-rate { color: var(--strata-accent); }
+  .card-strata .note-chip { background: rgba(167,139,250,0.12); color: #c4b5fd; }
+
+  /* Chase */
+  .card-chase .card-header { background: var(--chase-bg); }
+  .card-chase .card-icon { background: rgba(96,165,250,0.15); }
+  .card-chase .card-name { color: var(--chase-accent); }
+  .card-chase .card-role { color: #93c5fd; }
+  .card-chase .card-body { background: #091830; }
+  .card-chase .cat-rate { color: var(--chase-accent); }
+  .card-chase .note-chip { background: rgba(96,165,250,0.12); color: #93c5fd; }
+
+  /* Quicksilver */
+  .card-qs .card-header { background: var(--qs-bg); }
+  .card-qs .card-icon { background: rgba(251,146,60,0.15); }
+  .card-qs .card-name { color: var(--qs-accent); }
+  .card-qs .card-role { color: #fdba74; }
+  .card-qs .card-body { background: #200f00; }
+  .card-qs .cat-rate { color: var(--qs-accent); }
+  .card-qs .note-chip { background: rgba(251,146,60,0.12); color: #fdba74; }
+
+  /* quick lookup */
+  .lookup-wrap { padding: 0 20px 8px; }
+  .lookup-label { font-size: 12px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .lookup-input {
+    width: 100%;
+    background: #1c1c1c;
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 15px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .lookup-input::placeholder { color: #555; }
+  .lookup-input:focus { border-color: #555; }
+
+  .lookup-result {
+    margin-top: 10px;
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: none;
+  }
+  .lookup-result.visible { display: block; }
+  .lookup-card-name { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .lookup-rate { font-size: 22px; font-weight: 600; }
+  .lookup-why { font-size: 13px; margin-top: 4px; opacity: 0.75; }
+
+  .bottom-rule {
+    margin: 8px 20px 0;
+    text-align: center;
+    font-size: 12px;
+    color: #555;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="app-title">Which card do I swipe?</div>
+  <div class="app-subtitle">Jen & Matt's reward strategy · May 2026</div>
+</div>
+
+<div class="lookup-wrap" style="margin-top:16px;">
+  <div class="lookup-label">Quick lookup</div>
+  <input class="lookup-input" type="text" id="searchInput" placeholder="Type what you're buying..." autocomplete="off">
+  <div class="lookup-result" id="lookupResult">
+    <div class="lookup-card-name" id="rCard"></div>
+    <div class="lookup-rate" id="rRate"></div>
+    <div class="lookup-why" id="rWhy"></div>
+  </div>
+</div>
+
+<div class="rule-bar">
+  <strong>The rule:</strong> Charge it, pay it same day. Never let a balance sit. Don't activate this strategy until Credit One red is paid off.
+</div>
+
+<div class="cards-list">
+
+  <!-- X5 -->
+  <div class="card-section card-x5" id="x5">
+    <div class="card-header" onclick="toggle('x5')">
+      <div class="card-icon">🟢</div>
+      <div class="card-info">
+        <div class="card-name">Credit One X5</div>
+        <div class="card-role">Utilities, gas, groceries, phone</div>
+      </div>
+      <div class="chevron">⌄</div>
+    </div>
+    <div class="card-body">
+      <div class="cat-row"><span class="cat-name">Gas station</span><span class="cat-rate">5% cash back</span></div>
+      <div class="cat-row"><span class="cat-name">Groceries (supermarket only)</span><span class="cat-rate">5% cash back</span></div>
+      <div class="cat-row"><span class="cat-name">Internet / cable / satellite</span><span class="cat-rate">5% cash back</span></div>
+      <div class="cat-row"><span class="cat-name">Phone bill</span><span class="cat-rate">5% cash back</span></div>
+      <div class="cat-row"><span class="cat-name">Everything else</span><span class="cat-rate" style="opacity:0.5;">1%</span></div>
+      <span class="note-chip">⚠ $5,000/yr combined cap across all 5% categories — switch to Strata for gas & groceries after cap</span>
+      <span class="note-chip" style="margin-left:6px;">Walmart, Target, Costco do NOT qualify for 5%</span>
+    </div>
+  </div>
+
+  <!-- Strata -->
+  <div class="card-section card-strata" id="strata">
+    <div class="card-header" onclick="toggle('strata')">
+      <div class="card-icon">🟣</div>
+      <div class="card-info">
+        <div class="card-name">Citi Strata Premier</div>
+        <div class="card-role">Travel, dining, big-box stores</div>
+      </div>
+      <div class="chevron">⌄</div>
+    </div>
+    <div class="card-body">
+      <div class="cat-row"><span class="cat-name">Hotels via CitiTravel.com</span><span class="cat-rate">10x points</span></div>
+      <div class="cat-row"><span class="cat-name">Flights (booked direct)</span><span class="cat-rate">3x points</span></div>
+      <div class="cat-row"><span class="cat-name">Restaurants & dining</span><span class="cat-rate">3x points</span></div>
+      <div class="cat-row"><span class="cat-name">Walmart / Target / Costco</span><span class="cat-rate">3x points</span></div>
+      <div class="cat-row"><span class="cat-name">Hotels booked direct</span><span class="cat-rate">3x points</span></div>
+      <div class="cat-row"><span class="cat-name">Gas & groceries (after cap)</span><span class="cat-rate">3x points</span></div>
+      <div class="cat-row"><span class="cat-name">Everything else</span><span class="cat-rate" style="opacity:0.5;">1x</span></div>
+      <span class="note-chip">$100 hotel credit on stays $500+ via CitiTravel · Transfers to United 1:1</span>
+    </div>
+  </div>
+
+  <!-- Chase -->
+  <div class="card-section card-chase" id="chase">
+    <div class="card-header" onclick="toggle('chase')">
+      <div class="card-icon">🔵</div>
+      <div class="card-info">
+        <div class="card-name">Chase Sapphire Preferred</div>
+        <div class="card-role">Cruise, rental cars, streaming, IHG</div>
+      </div>
+      <div class="chevron">⌄</div>
+    </div>
+    <div class="card-body">
+      <div class="cat-row"><span class="cat-name">Chase Travel portal</span><span class="cat-rate">5x points</span></div>
+      <div class="cat-row"><span class="cat-name">Lyft (through Sept 2027)</span><span class="cat-rate">5x points</span></div>
+      <div class="cat-row"><span class="cat-name">Streaming services</span><span class="cat-rate">3x points</span></div>
+      <div class="cat-row"><span class="cat-name">Dining & restaurants</span><span class="cat-rate">3x points</span></div>
+      <div class="cat-row"><span class="cat-name">Rental cars</span><span class="cat-rate">2x + insurance</span></div>
+      <div class="cat-row"><span class="cat-name">Cruise payment</span><span class="cat-rate">2x + 75k bonus</span></div>
+      <div class="cat-row"><span class="cat-name">IHG hotel stays (paid nights)</span><span class="cat-rate">2x points</span></div>
+      <div class="cat-row"><span class="cat-name">All other travel</span><span class="cat-rate">2x points</span></div>
+      <span class="note-chip">PRIMARY rental car insurance — big deal · Transfers to IHG 1:1 & United 1:1</span>
+    </div>
+  </div>
+
+  <!-- Quicksilver -->
+  <div class="card-section card-qs" id="qs">
+    <div class="card-header" onclick="toggle('qs')">
+      <div class="card-icon">🟠</div>
+      <div class="card-info">
+        <div class="card-name">Capital One Quicksilver</div>
+        <div class="card-role">Utilities & everything else</div>
+      </div>
+      <div class="chevron">⌄</div>
+    </div>
+    <div class="card-body">
+      <div class="cat-row"><span class="cat-name">Electric / water / gas utility</span><span class="cat-rate">1.5% cash back</span></div>
+      <div class="cat-row"><span class="cat-name">Anything that doesn't fit above</span><span class="cat-rate">1.5% cash back</span></div>
+      <span class="note-chip">No annual fee · No categories to track · Pure catch-all</span>
+    </div>
+  </div>
+
+</div>
+
+<div class="bottom-rule">Made with love for the McNew family cruise fund ⚓</div>
+
+<script>
+function toggle(id) {
+  const el = document.getElementById(id);
+  const isOpen = el.classList.contains('open');
+  document.querySelectorAll('.card-section').forEach(s => s.classList.remove('open'));
+  if (!isOpen) el.classList.add('open');
+}
+
+const rules = [
+  { keys: ['gas','fuel','petrol','shell','chevron','exxon','mobil','costco gas','murphy'], card: 'Credit One X5', rate: '5% cash back', why: 'Under $5k/yr cap. Switch to Strata after cap.' },
+  { keys: ['grocery','groceries','supermarket','heb','kroger','safeway','whole foods','sprouts','aldi'], card: 'Credit One X5', rate: '5% cash back', why: 'Full-service supermarkets only. Not Walmart/Target/Costco.' },
+  { keys: ['internet','wifi','cable','satellite','at&t','spectrum','comcast','xfinity','directv','dish'], card: 'Credit One X5', rate: '5% cash back', why: 'Utility category — highest rate in your wallet.' },
+  { keys: ['phone','mobile','verizon','t-mobile','tmobile','sprint','att bill','phone bill'], card: 'Credit One X5', rate: '5% cash back', why: 'Phone bill = utility category on X5.' },
+  { keys: ['hotel','hotels','inn','marriott','hilton','ihg','holiday inn','hyatt','seattle hotel','airbnb'], card: 'Chase Sapphire Preferred', rate: '2x points (IHG)', why: 'IHG transfers 1:1 from Chase. Use Strata 10x for non-IHG hotels via CitiTravel.' },
+  { keys: ['cititravel','citi travel'], card: 'Citi Strata Premier', rate: '10x points', why: 'Highest hotel rate anywhere in your wallet.' },
+  { keys: ['restaurant','dining','dinner','lunch','eat','food','taco','pizza','burger','chick-fil-a','mcdonalds','whataburger','starbucks'], card: 'Citi Strata Premier', rate: '3x points', why: 'Ties with Chase — use Strata to diversify ecosystems.' },
+  { keys: ['walmart','target','costco','sams','sam\'s'], card: 'Citi Strata Premier', rate: '3x points', why: 'Big-box stores excluded from X5; Strata is next best.' },
+  { keys: ['flight','airline','flights','airfare','united','american airlines','southwest','delta'], card: 'Citi Strata Premier', rate: '3x points', why: 'Book directly with airline for 3x. Strata transfers to United 1:1.' },
+  { keys: ['cruise','carnival','royal caribbean','norwegian','celebrity'], card: 'Chase Sapphire Preferred', rate: '2x + 75k bonus', why: '$10k cruise spend earns the full 75,000-point welcome bonus.' },
+  { keys: ['rental car','rent a car','enterprise','hertz','avis','budget car'], card: 'Chase Sapphire Preferred', rate: '2x + primary insurance', why: 'Primary CDW coverage — could save hundreds if anything happens.' },
+  { keys: ['lyft'], card: 'Chase Sapphire Preferred', rate: '5x points', why: 'Through September 2027 only.' },
+  { keys: ['streaming','netflix','hulu','disney','hbo','max','peacock','spotify','apple tv'], card: 'Chase Sapphire Preferred', rate: '3x points', why: 'Sapphire specifically covers streaming at 3x.' },
+  { keys: ['electric','electricity','water bill','utility','reliant','centerpoint','txu'], card: 'Capital One Quicksilver', rate: '1.5% cash back', why: 'Other cards earn 1x here. Quicksilver\'s flat rate wins.' },
+];
+
+const colors = {
+  'Credit One X5': { bg: 'rgba(34,197,94,0.12)', name: '#22c55e', rate: '#4ade80' },
+  'Citi Strata Premier': { bg: 'rgba(167,139,250,0.12)', name: '#a78bfa', rate: '#c4b5fd' },
+  'Chase Sapphire Preferred': { bg: 'rgba(96,165,250,0.12)', name: '#60a5fa', rate: '#93c5fd' },
+  'Capital One Quicksilver': { bg: 'rgba(251,146,60,0.12)', name: '#fb923c', rate: '#fdba74' },
+};
+
+const input = document.getElementById('searchInput');
+const result = document.getElementById('lookupResult');
+const rCard = document.getElementById('rCard');
+const rRate = document.getElementById('rRate');
+const rWhy = document.getElementById('rWhy');
+
+input.addEventListener('input', () => {
+  const q = input.value.toLowerCase().trim();
+  if (!q) { result.classList.remove('visible'); return; }
+  const match = rules.find(r => r.keys.some(k => q.includes(k) || k.includes(q)));
+  if (match) {
+    const c = colors[match.card];
+    result.style.background = c.bg;
+    rCard.style.color = c.name;
+    rRate.style.color = c.rate;
+    rCard.textContent = match.card;
+    rRate.textContent = match.rate;
+    rWhy.textContent = match.why;
+    rWhy.style.color = '#aaa';
+    result.classList.add('visible');
+  } else {
+    rCard.style.color = '#fb923c';
+    rRate.style.color = '#fdba74';
+    result.style.background = 'rgba(251,146,60,0.08)';
+    rCard.textContent = 'Capital One Quicksilver';
+    rRate.textContent = '1.5% cash back';
+    rWhy.textContent = 'Default catch-all — always earns something.';
+    rWhy.style.color = '#aaa';
+    result.classList.add('visible');
+  }
+});
+</script>
+
+</body>
+</html>
