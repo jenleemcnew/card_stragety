@@ -2,396 +2,904 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Jen's Card Strategy</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WhichCard? — Swipe smarter. No account required.</title>
+<meta name="description" content="The only credit card optimizer that never asks for your name, email, or bank login. Add your cards. Get instant answers. Completely private.">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --x5-bg: #0a2e1a;
-    --x5-accent: #22c55e;
-    --x5-light: #dcfce7;
-    --x5-mid: #16a34a;
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    --strata-bg: #1a1240;
-    --strata-accent: #a78bfa;
-    --strata-light: #ede9fe;
-    --strata-mid: #7c3aed;
+:root {
+  --bg: #060606;
+  --surface: #0f0f0f;
+  --surface2: #161616;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text: #f0ede8;
+  --muted: #888;
+  --muted2: #888;
+  --accent: #86efac;
+  --accent-dim: rgba(134,239,172,0.1);
+  --accent-border: rgba(134,239,172,0.22);
+}
 
-    --chase-bg: #0c1f3d;
-    --chase-accent: #60a5fa;
-    --chase-light: #dbeafe;
-    --chase-mid: #2563eb;
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
 
-    --qs-bg: #2a1500;
-    --qs-accent: #fb923c;
-    --qs-light: #ffedd5;
-    --qs-mid: #ea580c;
+/* ── NOISE TEXTURE OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.4;
+}
 
-    --bg: #0f0f0f;
-    --surface: #1a1a1a;
-    --border: rgba(255,255,255,0.08);
-    --text: #f5f5f5;
-    --muted: #888;
-  }
+section, nav, footer { position: relative; z-index: 1; }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+/* ── NAV ── */
+nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 48px;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(6,6,6,0.92);
+  backdrop-filter: blur(12px);
+}
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-    padding: 0 0 80px;
-  }
+.nav-logo {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 20px; font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  text-decoration: none;
+}
+.nav-logo span { color: var(--accent); }
 
-  .app-header {
-    padding: 28px 20px 20px;
-    border-bottom: 1px solid var(--border);
-  }
+.nav-cta {
+  background: var(--accent);
+  color: #060606;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px; font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.15s, transform 0.15s;
+  display: inline-block;
+}
+.nav-cta:hover { opacity: 0.9; transform: translateY(-1px); }
 
-  .app-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: 26px;
-    font-weight: 400;
-    line-height: 1.2;
-    color: var(--text);
-  }
+/* ── HERO ── */
+.hero {
+  min-height: 90vh;
+  padding: 80px 48px 60px;
+  position: relative;
+  overflow: hidden;
+}
 
-  .app-subtitle {
-    font-size: 13px;
-    color: var(--muted);
-    margin-top: 4px;
-    font-weight: 300;
-  }
+.hero-glow {
+  position: absolute;
+  top: -200px; left: 50%; transform: translateX(-50%);
+  width: 700px; height: 500px;
+  background: radial-gradient(ellipse, rgba(134,239,172,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
 
-  .rule-bar {
-    background: #1c1c1c;
-    border: 1px solid #2a2a2a;
-    border-radius: 10px;
-    margin: 16px 20px 0;
-    padding: 10px 14px;
-    font-size: 12px;
-    color: #aaa;
-    line-height: 1.5;
-  }
+/* Hero two-col grid */
+.hero-inner {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 0;
+  align-items: start;
+  min-height: calc(90vh - 140px);
+}
+.hero-text { min-width: 0; }
 
-  .rule-bar strong { color: var(--text); font-weight: 500; }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-border);
+  border-radius: 100px;
+  padding: 6px 14px;
+  font-size: 12px; font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 36px;
+  width: fit-content;
+  animation: fadeUp 0.6s ease both;
+}
 
-  .cards-list { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+.hero-eyebrow::before {
+  content: '';
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 2s infinite;
+}
 
-  .card-section {
-    border-radius: 16px;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.06);
-  }
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
 
-  .card-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px;
-    cursor: pointer;
-    user-select: none;
-    transition: opacity 0.15s;
-  }
-  .card-header:active { opacity: 0.8; }
+.hero-h1 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(52px, 7vw, 96px);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  color: var(--text);
+  margin-bottom: 28px;
+  animation: fadeUp 0.6s 0.1s ease both;
+}
 
-  .card-icon {
-    width: 42px; height: 42px;
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
-    flex-shrink: 0;
-  }
+.hero-h1 .accent { color: var(--accent); }
+.hero-h1 .ghost {
+  color: rgba(240,237,232,0.18);
+}
 
-  .card-info { flex: 1; }
-  .card-name { font-size: 15px; font-weight: 600; line-height: 1.2; }
-  .card-role { font-size: 12px; font-weight: 300; margin-top: 2px; opacity: 0.75; }
+.hero-sub {
+  font-size: clamp(16px, 2vw, 20px);
+  color: var(--muted2);
+  font-weight: 300;
+  line-height: 1.6;
+  max-width: 520px;
+  margin-bottom: 48px;
+  animation: fadeUp 0.6s 0.2s ease both;
+}
 
-  .chevron {
-    font-size: 18px;
-    opacity: 0.5;
-    transition: transform 0.25s ease;
-    flex-shrink: 0;
-  }
-  .card-section.open .chevron { transform: rotate(180deg); }
+.hero-sub strong { color: var(--text); font-weight: 500; }
 
-  .card-body {
-    display: none;
-    padding: 0 14px 14px;
-  }
-  .card-section.open .card-body { display: block; }
+.hero-actions {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  animation: fadeUp 0.6s 0.3s ease both;
+  margin-bottom: 72px;
+}
 
-  .cat-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    gap: 8px;
-  }
-  .cat-row:last-child { border-bottom: none; }
+.btn-hero {
+  background: var(--accent);
+  color: #060606;
+  border: none;
+  border-radius: 12px;
+  padding: 18px 32px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 16px; font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  transition: transform 0.15s, opacity 0.15s;
+  letter-spacing: -0.01em;
+}
+.btn-hero:hover { transform: translateY(-2px); opacity: 0.95; }
 
-  .cat-name { font-size: 14px; color: #ccc; font-weight: 400; flex: 1; }
-  .cat-rate { font-size: 14px; font-weight: 600; white-space: nowrap; }
+.btn-hero-ghost {
+  color: var(--muted2);
+  font-size: 14px;
+  text-decoration: none;
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: color 0.15s;
+}
+.btn-hero-ghost:hover { color: var(--text); }
 
-  .note-chip {
-    font-size: 11px;
-    padding: 4px 10px;
-    border-radius: 20px;
-    margin-top: 10px;
-    display: inline-block;
-    font-weight: 400;
-    line-height: 1.5;
-  }
+/* Stat bar */
+.hero-stats {
+  display: flex; gap: 48px; flex-wrap: wrap;
+  animation: fadeUp 0.6s 0.4s ease both;
+  padding-top: 36px;
+  border-top: 1px solid var(--border);
+}
 
-  /* X5 */
-  .card-x5 .card-header { background: var(--x5-bg); }
-  .card-x5 .card-icon { background: rgba(34,197,94,0.15); }
-  .card-x5 .card-name { color: var(--x5-accent); }
-  .card-x5 .card-role { color: #86efac; }
-  .card-x5 .card-body { background: #0d2218; }
-  .card-x5 .cat-rate { color: var(--x5-accent); }
-  .card-x5 .note-chip { background: rgba(34,197,94,0.12); color: #86efac; }
+.stat-item {}
+.stat-num {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 32px; font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+.stat-num span { color: var(--accent); }
+.stat-label {
+  font-size: 13px; color: var(--muted2);
+  margin-top: 4px; font-weight: 300;
+}
 
-  /* Strata */
-  .card-strata .card-header { background: var(--strata-bg); }
-  .card-strata .card-icon { background: rgba(167,139,250,0.15); }
-  .card-strata .card-name { color: var(--strata-accent); }
-  .card-strata .card-role { color: #c4b5fd; }
-  .card-strata .card-body { background: #150f36; }
-  .card-strata .cat-rate { color: var(--strata-accent); }
-  .card-strata .note-chip { background: rgba(167,139,250,0.12); color: #c4b5fd; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
-  /* Chase */
-  .card-chase .card-header { background: var(--chase-bg); }
-  .card-chase .card-icon { background: rgba(96,165,250,0.15); }
-  .card-chase .card-name { color: var(--chase-accent); }
-  .card-chase .card-role { color: #93c5fd; }
-  .card-chase .card-body { background: #091830; }
-  .card-chase .cat-rate { color: var(--chase-accent); }
-  .card-chase .note-chip { background: rgba(96,165,250,0.12); color: #93c5fd; }
+/* ── PRIVACY STRIP ── */
+.privacy-strip {
+  background: var(--accent);
+  padding: 18px 48px;
+  display: flex; align-items: center; justify-content: center;
+  gap: 48px; flex-wrap: wrap;
+  overflow: hidden;
+  position: relative;
+}
 
-  /* Quicksilver */
-  .card-qs .card-header { background: var(--qs-bg); }
-  .card-qs .card-icon { background: rgba(251,146,60,0.15); }
-  .card-qs .card-name { color: var(--qs-accent); }
-  .card-qs .card-role { color: #fdba74; }
-  .card-qs .card-body { background: #200f00; }
-  .card-qs .cat-rate { color: var(--qs-accent); }
-  .card-qs .note-chip { background: rgba(251,146,60,0.12); color: #fdba74; }
+.privacy-item {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px; font-weight: 700;
+  color: #060606;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.privacy-item::before { content: '✓'; font-size: 15px; }
 
-  /* quick lookup */
-  .lookup-wrap { padding: 0 20px 8px; }
-  .lookup-label { font-size: 12px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.06em; }
-  .lookup-input {
-    width: 100%;
-    background: #1c1c1c;
-    border: 1px solid #333;
-    border-radius: 12px;
-    padding: 12px 16px;
-    font-size: 15px;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .lookup-input::placeholder { color: #555; }
-  .lookup-input:focus { border-color: #555; }
+/* ── HOW IT WORKS ── */
+.how {
+  padding: 100px 48px;
+  max-width: 1100px; margin: 0 auto;
+}
 
-  .lookup-result {
-    margin-top: 10px;
-    border-radius: 12px;
-    padding: 14px 16px;
-    display: none;
-  }
-  .lookup-result.visible { display: block; }
-  .lookup-card-name { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
-  .lookup-rate { font-size: 22px; font-weight: 600; }
-  .lookup-why { font-size: 13px; margin-top: 4px; opacity: 0.75; }
+.section-label {
+  font-size: 11px; color: var(--muted2);
+  text-transform: uppercase; letter-spacing: 0.12em;
+  margin-bottom: 16px;
+}
 
-  .bottom-rule {
-    margin: 8px 20px 0;
-    text-align: center;
-    font-size: 12px;
-    color: #555;
-    font-style: italic;
-  }
+.section-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(36px, 4vw, 52px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  color: var(--text);
+  margin-bottom: 64px;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.step {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 32px 28px;
+  border-radius: 16px;
+  position: relative;
+  transition: background 0.2s, border-color 0.2s;
+}
+.step:hover { background: var(--surface2); border-color: var(--border2); }
+.step:first-child { border-radius: 16px; }
+.step:last-child { border-radius: 16px; }
+
+.step-num {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 11px; font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.step-icon {
+  font-size: 36px; margin-bottom: 16px;
+  display: block;
+}
+
+.step-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 20px; font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 10px;
+  line-height: 1.2;
+}
+
+.step-desc {
+  font-size: 14px; color: var(--muted2);
+  line-height: 1.6; font-weight: 300;
+}
+
+/* ── DIFFERENTIATOR ── */
+.diff {
+  padding: 0 48px 100px;
+  max-width: 1100px; margin: 0 auto;
+}
+
+.diff-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 700px) {
+  .diff-grid { grid-template-columns: 1fr; }
+}
+
+.diff-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 36px 32px;
+  transition: border-color 0.2s;
+}
+.diff-card:hover { border-color: var(--border2); }
+.diff-card.accent-card {
+  background: var(--accent-dim);
+  border-color: var(--accent-border);
+}
+
+.diff-icon { font-size: 32px; margin-bottom: 16px; }
+
+.diff-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 20px; font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.diff-card.accent-card .diff-title { color: var(--accent); }
+
+.diff-desc {
+  font-size: 14px; color: var(--muted2); line-height: 1.6; font-weight: 300;
+}
+.diff-card.accent-card .diff-desc { color: rgba(232,255,71,0.7); }
+
+/* ── COMPARISON TABLE ── */
+.compare {
+  padding: 0 48px 100px;
+  max-width: 860px; margin: 0 auto;
+}
+
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.compare-table thead tr {
+  background: var(--surface2);
+}
+
+.compare-table th {
+  padding: 16px 20px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px; font-weight: 700;
+  letter-spacing: -0.01em;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.compare-table th:not(:first-child) { text-align: center; }
+.compare-table td:not(:first-child) { text-align: center; }
+
+.compare-table th.accent-col { color: var(--accent); }
+
+.compare-table td {
+  padding: 14px 20px;
+  font-size: 14px; color: var(--muted2);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+.compare-table tr:last-child td { border-bottom: none; }
+
+.compare-table tr:nth-child(even) td { background: rgba(255,255,255,0.01); }
+
+.check { color: var(--accent); font-weight: 600; font-size: 16px; }
+.cross { color: #ff5757; font-size: 16px; }
+.maybe { color: var(--muted2); }
+
+/* ── CTA SECTION ── */
+.cta-section {
+  padding: 100px 48px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 70% at 50% 100%, rgba(134,239,172,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.cta-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(40px, 6vw, 72px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.0;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+.cta-title .accent { color: var(--accent); }
+
+.cta-sub {
+  font-size: 16px; color: var(--muted2);
+  font-weight: 300; line-height: 1.6;
+  max-width: 420px; margin: 0 auto 40px;
+}
+
+.cta-fine {
+  margin-top: 20px;
+  font-size: 12px; color: var(--muted);
+  font-style: italic;
+}
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 32px 48px;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+}
+
+.footer-logo {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 16px; font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--muted);
+}
+.footer-logo span { color: var(--muted2); }
+
+.footer-note {
+  font-size: 12px; color: var(--muted);
+  font-weight: 300;
+}
+
+/* ── PHONE MOCKUP ── */
+.hero-visual {
+  width: 280px;
+  margin: 40px 0 0 -100px;
+  flex-shrink: 0;
+  pointer-events: none;
+  display: block;
+}
+
+@media (max-width: 960px) {
+  .hero-inner { grid-template-columns: 1fr; min-height: auto; }
+  .hero-visual { display: none; }
+  .hero { padding: 60px 28px 50px; min-height: auto; }
+  nav { padding: 16px 24px; }
+  .how, .diff, .compare, .cta-section { padding-left: 24px; padding-right: 24px; }
+  .privacy-strip { padding: 16px 24px; gap: 20px; }
+  footer { padding: 28px 24px; }
+  .hero-stats { gap: 28px; }
+}
+
+.phone-frame {
+  background: #111;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  border-radius: 46px;
+  padding: 9px;
+  box-shadow:
+    0 40px 80px rgba(0,0,0,0.8),
+    0 0 0 1px rgba(255,255,255,0.04),
+    inset 0 0 0 1px rgba(255,255,255,0.05);
+}
+
+.phone-screen {
+  background: #080808;
+  border-radius: 38px;
+  overflow: hidden;
+  padding: 13px 12px;
+  height: 520px;
+  position: relative;
+}
+
+.phone-notch {
+  width: 80px; height: 22px;
+  background: #111;
+  border-radius: 0 0 14px 14px;
+  margin: 0 auto 14px;
+}
+
+.phone-topbar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+}
+.phone-logo {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 16px; font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #f0ede8;
+}
+.phone-logo span { color: #86efac; }
+
+.phone-label {
+  font-size: 9px; color: #555; text-transform: uppercase;
+  letter-spacing: 0.08em; margin-bottom: 6px;
+}
+
+.phone-search {
+  background: #181818;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px; color: #888;
+  margin-bottom: 10px;
+}
+
+.phone-result {
+  background: rgba(232,255,71,0.1);
+  border: 1px solid rgba(134,239,172,0.18);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+  animation: resultPop 3s infinite;
+}
+@keyframes resultPop {
+  0%, 100% { opacity: 1; }
+  40% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.phone-result-card {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px; font-weight: 700;
+  color: #86efac;
+  margin-bottom: 4px;
+}
+.phone-result-rate {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 20px; font-weight: 800;
+  color: #86efac;
+  letter-spacing: -0.03em;
+}
+.phone-result-why { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+
+.phone-cards { display: flex; flex-direction: column; gap: 6px; }
+.phone-card-row {
+  background: #111;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.phone-card-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.phone-card-name { font-size: 12px; font-weight: 500; color: #ccc; flex: 1; }
+.phone-card-top { font-size: 11px; color: #555; }
 </style>
 </head>
 <body>
 
-<div class="app-header">
-  <div class="app-title">Which card do I swipe?</div>
-  <div class="app-subtitle">Jen & Matt's reward strategy · May 2026</div>
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">Which<span>Card</span>?</a>
+  <a class="nav-cta" href="which-card.html">Try it free →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+    <div class="hero-text">
+
+  <div class="hero-eyebrow">Now in beta</div>
+
+  <h1 class="hero-h1">
+    Stop leaving<br>
+    rewards <span class="accent">on the</span><br>
+    <span class="ghost">table.</span>
+  </h1>
+
+  <p class="hero-sub">
+    Add your cards once. Type what you're buying.
+    Get the <strong>instant answer</strong> — no account, no bank link,
+    no data collected. Ever.
+  </p>
+
+  <div class="hero-actions">
+    <a class="btn-hero" href="which-card.html">Try it free →</a>
+    <a class="btn-hero-ghost" href="#how">See how it works ↓</a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat-item">
+      <div class="stat-num">$583<span>*</span></div>
+      <div class="stat-label">avg. household rewards left unclaimed/yr</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">0</div>
+      <div class="stat-label">accounts required</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">Any</div>
+      <div class="stat-label">card · any issuer · any country</div>
+    </div>
+  </div>
+
+    <div style="margin-top:20px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.06); display:flex; flex-direction:column; gap:8px;">
+      <p style="font-size:11px; color:#999; line-height:1.5;">
+        * $583 figure: WalletHub study, 2024. Average household rewards left unclaimed annually.
+      </p>
+      <p style="font-size:11px; color:#999; line-height:1.5;">
+        🌍 <strong style="color:var(--muted2); font-weight:500;">Regional cards shown based on your timezone</strong> — no location data collected or stored. Your phone's timezone tells us your region; nothing else is read or shared.
+      </p>
+    </div>
+
+    </div><!-- end hero-text -->
+  <div class="hero-visual">
+    <div class="phone-frame">
+      <div class="phone-screen">
+        <div class="phone-notch"></div>
+        <div class="phone-topbar">
+          <div class="phone-logo">Which<span>Card</span>?</div>
+          <div style="font-size:14px;">💳</div>
+        </div>
+        <div class="phone-label">What are you buying?</div>
+        <div class="phone-search">dinner at Whataburger…</div>
+        <div class="phone-result">
+          <div class="phone-result-card">Chase Sapphire Preferred</div>
+          <div class="phone-result-rate">3x points</div>
+          <div class="phone-result-why">Best dining rate in your wallet</div>
+        </div>
+        <div class="phone-label">My wallet</div>
+        <div class="phone-cards">
+          <div class="phone-card-row">
+            <div class="phone-card-dot" style="background:#4ade80"></div>
+            <div class="phone-card-name">Credit One X5</div>
+            <div class="phone-card-top">5% gas · groceries</div>
+          </div>
+          <div class="phone-card-row">
+            <div class="phone-card-dot" style="background:#60a5fa"></div>
+            <div class="phone-card-name">Chase Sapphire</div>
+            <div class="phone-card-top">3x dining · travel</div>
+          </div>
+          <div class="phone-card-row">
+            <div class="phone-card-dot" style="background:#a78bfa"></div>
+            <div class="phone-card-name">Citi Strata Premier</div>
+            <div class="phone-card-top">10x hotels · 3x more</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- end hero-visual -->
+  </div><!-- end hero-inner -->
+</section>
+
+<!-- PRIVACY STRIP -->
+<div class="privacy-strip">
+  <div class="privacy-item">No account required</div>
+  <div class="privacy-item">No bank login</div>
+  <div class="privacy-item">No personal data collected</div>
+  <div class="privacy-item">iPhone & Android</div>
+  <div class="privacy-item">Lives on your device</div>
 </div>
 
-<div class="lookup-wrap" style="margin-top:16px;">
-  <div class="lookup-label">Quick lookup</div>
-  <input class="lookup-input" type="text" id="searchInput" placeholder="Type what you're buying..." autocomplete="off">
-  <div class="lookup-result" id="lookupResult">
-    <div class="lookup-card-name" id="rCard"></div>
-    <div class="lookup-rate" id="rRate"></div>
-    <div class="lookup-why" id="rWhy"></div>
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="section-label">How it works</div>
+  <div class="section-title">Set up in 2 minutes.<br>Use it forever.</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">Step 01</div>
+      <span class="step-icon">🔍</span>
+      <div class="step-title">Type your card name</div>
+      <div class="step-desc">Just type the name — "Chase Freedom Unlimited," "Amex Gold," anything. AI instantly pulls the full reward structure for that card.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">Step 02</div>
+      <span class="step-icon">✓</span>
+      <div class="step-title">Confirm & add</div>
+      <div class="step-desc">Review the reward categories AI found — bonus rates, caps, exclusions — and tap to add it to your personal wallet.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">Step 03</div>
+      <span class="step-icon">⚡</span>
+      <div class="step-title">Ask anything</div>
+      <div class="step-desc">Type "gas," "Costco," "dinner out," "Netflix" — instantly see which of your cards earns the most and why.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">Step 04</div>
+      <span class="step-icon">💾</span>
+      <div class="step-title">It remembers you</div>
+      <div class="step-desc">Your card lineup is saved on your device. Open it next month and everything's exactly where you left it — no login required.</div>
+    </div>
   </div>
-</div>
 
-<div class="rule-bar">
-  <strong>The rule:</strong> Charge it, pay it same day. Never let a balance sit. Don't activate this strategy until Credit One red is paid off.
-</div>
-
-<div class="cards-list">
-
-  <!-- X5 -->
-  <div class="card-section card-x5" id="x5">
-    <div class="card-header" onclick="toggle('x5')">
-      <div class="card-icon">🟢</div>
-      <div class="card-info">
-        <div class="card-name">Credit One X5</div>
-        <div class="card-role">Utilities, gas, groceries, phone</div>
+  <!-- Platform note -->
+  <div style="margin-top:32px; background:var(--surface2); border:1px solid var(--border2); border-radius:16px; padding:24px 28px; display:flex; align-items:center; gap:32px; flex-wrap:wrap;">
+    <div style="font-size:13px; color:var(--muted2); font-weight:500; text-transform:uppercase; letter-spacing:0.08em; white-space:nowrap;">Works on</div>
+    <div style="display:flex; gap:28px; flex-wrap:wrap; flex:1;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-size:24px;">🍎</span>
+        <div>
+          <div style="font-size:14px; font-weight:600; color:var(--text);">iPhone</div>
+          <div style="font-size:12px; color:var(--muted2);">Safari → Share → Add to Home Screen</div>
+        </div>
       </div>
-      <div class="chevron">⌄</div>
-    </div>
-    <div class="card-body">
-      <div class="cat-row"><span class="cat-name">Gas station</span><span class="cat-rate">5% cash back</span></div>
-      <div class="cat-row"><span class="cat-name">Groceries (supermarket only)</span><span class="cat-rate">5% cash back</span></div>
-      <div class="cat-row"><span class="cat-name">Internet / cable / satellite</span><span class="cat-rate">5% cash back</span></div>
-      <div class="cat-row"><span class="cat-name">Phone bill</span><span class="cat-rate">5% cash back</span></div>
-      <div class="cat-row"><span class="cat-name">Everything else</span><span class="cat-rate" style="opacity:0.5;">1%</span></div>
-      <span class="note-chip">⚠ $5,000/yr combined cap across all 5% categories — switch to Strata for gas & groceries after cap</span>
-      <span class="note-chip" style="margin-left:6px;">Walmart, Target, Costco do NOT qualify for 5%</span>
-    </div>
-  </div>
-
-  <!-- Strata -->
-  <div class="card-section card-strata" id="strata">
-    <div class="card-header" onclick="toggle('strata')">
-      <div class="card-icon">🟣</div>
-      <div class="card-info">
-        <div class="card-name">Citi Strata Premier</div>
-        <div class="card-role">Travel, dining, big-box stores</div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-size:24px;">🤖</span>
+        <div>
+          <div style="font-size:14px; font-weight:600; color:var(--text);">Android</div>
+          <div style="font-size:12px; color:var(--muted2);">Chrome → Menu → Add to Home Screen</div>
+        </div>
       </div>
-      <div class="chevron">⌄</div>
-    </div>
-    <div class="card-body">
-      <div class="cat-row"><span class="cat-name">Hotels via CitiTravel.com</span><span class="cat-rate">10x points</span></div>
-      <div class="cat-row"><span class="cat-name">Flights (booked direct)</span><span class="cat-rate">3x points</span></div>
-      <div class="cat-row"><span class="cat-name">Restaurants & dining</span><span class="cat-rate">3x points</span></div>
-      <div class="cat-row"><span class="cat-name">Walmart / Target / Costco</span><span class="cat-rate">3x points</span></div>
-      <div class="cat-row"><span class="cat-name">Hotels booked direct</span><span class="cat-rate">3x points</span></div>
-      <div class="cat-row"><span class="cat-name">Gas & groceries (after cap)</span><span class="cat-rate">3x points</span></div>
-      <div class="cat-row"><span class="cat-name">Everything else</span><span class="cat-rate" style="opacity:0.5;">1x</span></div>
-      <span class="note-chip">$100 hotel credit on stays $500+ via CitiTravel · Transfers to United 1:1</span>
-    </div>
-  </div>
-
-  <!-- Chase -->
-  <div class="card-section card-chase" id="chase">
-    <div class="card-header" onclick="toggle('chase')">
-      <div class="card-icon">🔵</div>
-      <div class="card-info">
-        <div class="card-name">Chase Sapphire Preferred</div>
-        <div class="card-role">Cruise, rental cars, streaming, IHG</div>
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-size:24px;">💻</span>
+        <div>
+          <div style="font-size:14px; font-weight:600; color:var(--text);">Desktop</div>
+          <div style="font-size:12px; color:var(--muted2);">Any browser, bookmark it and go</div>
+        </div>
       </div>
-      <div class="chevron">⌄</div>
     </div>
-    <div class="card-body">
-      <div class="cat-row"><span class="cat-name">Chase Travel portal</span><span class="cat-rate">5x points</span></div>
-      <div class="cat-row"><span class="cat-name">Lyft (through Sept 2027)</span><span class="cat-rate">5x points</span></div>
-      <div class="cat-row"><span class="cat-name">Streaming services</span><span class="cat-rate">3x points</span></div>
-      <div class="cat-row"><span class="cat-name">Dining & restaurants</span><span class="cat-rate">3x points</span></div>
-      <div class="cat-row"><span class="cat-name">Rental cars</span><span class="cat-rate">2x + insurance</span></div>
-      <div class="cat-row"><span class="cat-name">Cruise payment</span><span class="cat-rate">2x + 75k bonus</span></div>
-      <div class="cat-row"><span class="cat-name">IHG hotel stays (paid nights)</span><span class="cat-rate">2x points</span></div>
-      <div class="cat-row"><span class="cat-name">All other travel</span><span class="cat-rate">2x points</span></div>
-      <span class="note-chip">PRIMARY rental car insurance — big deal · Transfers to IHG 1:1 & United 1:1</span>
+    <div style="font-size:12px; color:#999; font-style:italic; width:100%; padding-top:12px; border-top:1px solid var(--border);">No App Store. No Google Play. No download. Just open the link and it works like a real app on any device.</div>
+  </div>
+</section>
+
+<!-- DIFFERENTIATORS -->
+<section class="diff">
+  <div class="section-label">Why WhichCard?</div>
+  <div class="section-title">Built different.<br>By design.</div>
+  <div class="diff-grid">
+    <div class="diff-card accent-card">
+      <div class="diff-icon">🔒</div>
+      <div class="diff-title">Radically private</div>
+      <div class="diff-desc">We don't know your name. We don't know your email. We've never seen a single transaction. Your card strategy lives on your phone — not our servers. Not anywhere.</div>
+    </div>
+    <div class="diff-card">
+      <div class="diff-icon">🃏</div>
+      <div class="diff-title">Works with any card</div>
+      <div class="diff-desc">Chase, Amex, Citi, Capital One, Discover, credit unions, store cards — if it exists, type the name and AI will find its reward structure. No preset card list to scroll through.</div>
+    </div>
+    <div class="diff-card">
+      <div class="diff-icon">🧠</div>
+      <div class="diff-title">AI that actually understands</div>
+      <div class="diff-desc">Type "Whataburger" and it knows that's dining. Type "HEB" and it knows that's a grocery store. The lookup understands what you're actually buying, not just keywords.</div>
+    </div>
+    <div class="diff-card">
+      <div class="diff-icon">📱</div>
+      <div class="diff-title">iPhone & Android — no App Store needed</div>
+      <div class="diff-desc">Works on both platforms as a Progressive Web App. iPhone: Safari → Share → Add to Home Screen. Android: Chrome → Menu → Add to Home Screen. Offline-capable once installed.</div>
     </div>
   </div>
+</section>
 
-  <!-- Quicksilver -->
-  <div class="card-section card-qs" id="qs">
-    <div class="card-header" onclick="toggle('qs')">
-      <div class="card-icon">🟠</div>
-      <div class="card-info">
-        <div class="card-name">Capital One Quicksilver</div>
-        <div class="card-role">Utilities & everything else</div>
-      </div>
-      <div class="chevron">⌄</div>
-    </div>
-    <div class="card-body">
-      <div class="cat-row"><span class="cat-name">Electric / water / gas utility</span><span class="cat-rate">1.5% cash back</span></div>
-      <div class="cat-row"><span class="cat-name">Anything that doesn't fit above</span><span class="cat-rate">1.5% cash back</span></div>
-      <span class="note-chip">No annual fee · No categories to track · Pure catch-all</span>
-    </div>
-  </div>
+<!-- COMPARISON -->
+<section class="compare">
+  <div class="section-label">The honest comparison</div>
+  <div class="section-title" id="compareTitle">WhichCard? vs. everyone else</div>
+  <table class="compare-table" id="compareTable">
+    <!-- Populated by JS based on region -->
+  </table>
+  <p style="font-size:12px; color:#999; margin-top:16px; font-style:italic;" id="compareNote"></p>
+</section>
 
-</div>
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-bg"></div>
+  <h2 class="cta-title">Start swiping<br><span class="accent">smarter</span> today.</h2>
+  <p class="cta-sub">Free. Private. No sign-up. Takes 2 minutes to set up with your actual cards.</p>
+  <a class="btn-hero" href="which-card.html">Open WhichCard? →</a>
+  <p class="cta-fine">Works in any mobile browser · Add to home screen for app-like experience</p>
+</section>
 
-<div class="bottom-rule">Made with love for the McNew family cruise fund ⚓</div>
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Which<span>Card</span>?</div>
+  <div class="footer-note">No data collected. No account needed. Your wallet, your business.</div>
+</footer>
 
 <script>
-function toggle(id) {
-  const el = document.getElementById(id);
-  const isOpen = el.classList.contains('open');
-  document.querySelectorAll('.card-section').forEach(s => s.classList.remove('open'));
-  if (!isOpen) el.classList.add('open');
-}
-
-const rules = [
-  { keys: ['gas','fuel','petrol','shell','chevron','exxon','mobil','costco gas','murphy'], card: 'Credit One X5', rate: '5% cash back', why: 'Under $5k/yr cap. Switch to Strata after cap.' },
-  { keys: ['grocery','groceries','supermarket','heb','kroger','safeway','whole foods','sprouts','aldi'], card: 'Credit One X5', rate: '5% cash back', why: 'Full-service supermarkets only. Not Walmart/Target/Costco.' },
-  { keys: ['internet','wifi','cable','satellite','at&t','spectrum','comcast','xfinity','directv','dish'], card: 'Credit One X5', rate: '5% cash back', why: 'Utility category — highest rate in your wallet.' },
-  { keys: ['phone','mobile','verizon','t-mobile','tmobile','sprint','att bill','phone bill'], card: 'Credit One X5', rate: '5% cash back', why: 'Phone bill = utility category on X5.' },
-  { keys: ['hotel','hotels','inn','marriott','hilton','ihg','holiday inn','hyatt','seattle hotel','airbnb'], card: 'Chase Sapphire Preferred', rate: '2x points (IHG)', why: 'IHG transfers 1:1 from Chase. Use Strata 10x for non-IHG hotels via CitiTravel.' },
-  { keys: ['cititravel','citi travel'], card: 'Citi Strata Premier', rate: '10x points', why: 'Highest hotel rate anywhere in your wallet.' },
-  { keys: ['restaurant','dining','dinner','lunch','eat','food','taco','pizza','burger','chick-fil-a','mcdonalds','whataburger','starbucks'], card: 'Citi Strata Premier', rate: '3x points', why: 'Ties with Chase — use Strata to diversify ecosystems.' },
-  { keys: ['walmart','target','costco','sams','sam\'s'], card: 'Citi Strata Premier', rate: '3x points', why: 'Big-box stores excluded from X5; Strata is next best.' },
-  { keys: ['flight','airline','flights','airfare','united','american airlines','southwest','delta'], card: 'Citi Strata Premier', rate: '3x points', why: 'Book directly with airline for 3x. Strata transfers to United 1:1.' },
-  { keys: ['cruise','carnival','royal caribbean','norwegian','celebrity'], card: 'Chase Sapphire Preferred', rate: '2x + 75k bonus', why: '$10k cruise spend earns the full 75,000-point welcome bonus.' },
-  { keys: ['rental car','rent a car','enterprise','hertz','avis','budget car'], card: 'Chase Sapphire Preferred', rate: '2x + primary insurance', why: 'Primary CDW coverage — could save hundreds if anything happens.' },
-  { keys: ['lyft'], card: 'Chase Sapphire Preferred', rate: '5x points', why: 'Through September 2027 only.' },
-  { keys: ['streaming','netflix','hulu','disney','hbo','max','peacock','spotify','apple tv'], card: 'Chase Sapphire Preferred', rate: '3x points', why: 'Sapphire specifically covers streaming at 3x.' },
-  { keys: ['electric','electricity','water bill','utility','reliant','centerpoint','txu'], card: 'Capital One Quicksilver', rate: '1.5% cash back', why: 'Other cards earn 1x here. Quicksilver\'s flat rate wins.' },
-];
-
-const colors = {
-  'Credit One X5': { bg: 'rgba(34,197,94,0.12)', name: '#22c55e', rate: '#4ade80' },
-  'Citi Strata Premier': { bg: 'rgba(167,139,250,0.12)', name: '#a78bfa', rate: '#c4b5fd' },
-  'Chase Sapphire Preferred': { bg: 'rgba(96,165,250,0.12)', name: '#60a5fa', rate: '#93c5fd' },
-  'Capital One Quicksilver': { bg: 'rgba(251,146,60,0.12)', name: '#fb923c', rate: '#fdba74' },
+// ── REGIONAL COMPARISON TABLE ──
+const REGION_COMPARE = {
+  us: {
+    note: 'Compared to the most popular US card reward apps.',
+    competitors: ['MaxRewards', 'CardPointers'],
+    rows: [
+      { feature: 'No account required',      wc: '✓', c1: '✕', c2: '✕' },
+      { feature: 'No bank account link',      wc: '✓', c1: '✕', c2: '✕' },
+      { feature: 'No transaction tracking',   wc: '✓', c1: '✕', c2: '✕' },
+      { feature: 'Works with any card',       wc: '✓', c1: 'Limited', c2: 'Limited' },
+      { feature: 'AI-powered card lookup',    wc: '✓', c1: '✕', c2: '✕' },
+      { feature: 'Works offline',             wc: '✓', c1: '✕', c2: 'Partial' },
+      { feature: 'Ad-free',                   wc: '✓', c1: '✕', c2: '✕' },
+      { feature: 'Free to use',               wc: '✓', c1: 'Freemium', c2: 'Freemium' },
+      { feature: 'No App Store needed',       wc: '✓', c1: '✕', c2: '✕' },
+    ]
+  },
+  uk: {
+    note: 'Compared to the most popular UK card & money tools.',
+    competitors: ['Curve', 'MoneySavingExpert'],
+    rows: [
+      { feature: 'No account required',       wc: '✓', c1: '✕', c2: 'Partial' },
+      { feature: 'No bank account link',       wc: '✓', c1: '✕', c2: '✓' },
+      { feature: 'No transaction tracking',    wc: '✓', c1: '✕', c2: '✓' },
+      { feature: 'Instant card reward lookup', wc: '✓', c1: '✕', c2: '✕' },
+      { feature: 'AI-powered card lookup',     wc: '✓', c1: '✕', c2: '✕' },
+      { feature: 'Works offline',              wc: '✓', c1: '✕', c2: '✕' },
+      { feature: 'Ad-free',                    wc: '✓', c1: 'Partial', c2: '✕' },
+      { feature: 'Free to use',                wc: '✓', c1: 'Freemium', c2: '✓' },
+      { feature: 'No App Store needed',        wc: '✓', c1: '✕', c2: '✓' },
+    ]
+  },
+  ca: {
+    note: 'Compared to the most popular Canadian personal finance tools.',
+    competitors: ['Borrowell', 'Ratehub'],
+    rows: [
+      { feature: 'No account required',       wc: '✓', c1: '✕', c2: 'Partial' },
+      { feature: 'No bank account link',       wc: '✓', c1: '✕', c2: '✓' },
+      { feature: 'No transaction tracking',    wc: '✓', c1: '✕', c2: '✓' },
+      { feature: 'Instant card reward lookup', wc: '✓', c1: '✕', c2: '✕' },
+      { feature: 'AI-powered card lookup',     wc: '✓', c1: '✕', c2: '✕' },
+      { feature: 'Works offline',              wc: '✓', c1: '✕', c2: '✕' },
+      { feature: 'Ad-free',                    wc: '✓', c1: '✕', c2: '✕' },
+      { feature: 'Free to use',                wc: '✓', c1: '✓', c2: '✓' },
+      { feature: 'No App Store needed',        wc: '✓', c1: '✕', c2: '✓' },
+    ]
+  },
+  au: {
+    note: 'Compared to the most popular Australian card comparison tools.',
+    competitors: ['Finder', 'Canstar'],
+    rows: [
+      { feature: 'No account required',       wc: '✓', c1: 'Partial', c2: 'Partial' },
+      { feature: 'No bank account link',       wc: '✓', c1: '✓', c2: '✓' },
+      { feature: 'No transaction tracking',    wc: '✓', c1: '✓', c2: '✓' },
+      { feature: 'Instant card reward lookup', wc: '✓', c1: '✕', c2: '✕' },
+      { feature: 'AI-powered card lookup',     wc: '✓', c1: '✕', c2: '✕' },
+      { feature: 'Works offline',              wc: '✓', c1: '✕', c2: '✕' },
+      { feature: 'Ad-free',                    wc: '✓', c1: '✕', c2: '✕' },
+      { feature: 'Free to use',                wc: '✓', c1: '✓', c2: '✓' },
+      { feature: 'No App Store needed',        wc: '✓', c1: '✓', c2: '✓' },
+    ]
+  }
 };
 
-const input = document.getElementById('searchInput');
-const result = document.getElementById('lookupResult');
-const rCard = document.getElementById('rCard');
-const rRate = document.getElementById('rRate');
-const rWhy = document.getElementById('rWhy');
+function detectLandingRegion() {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    if (/Europe/.test(tz)) return 'uk';
+    if (/Australia|Pacific\/Auckland/.test(tz)) return 'au';
+    if (/Canada|America\/Toronto|America\/Vancouver|America\/Winnipeg/.test(tz)) return 'ca';
+  } catch(e) {}
+  return 'us';
+}
 
-input.addEventListener('input', () => {
-  const q = input.value.toLowerCase().trim();
-  if (!q) { result.classList.remove('visible'); return; }
-  const match = rules.find(r => r.keys.some(k => q.includes(k) || k.includes(q)));
-  if (match) {
-    const c = colors[match.card];
-    result.style.background = c.bg;
-    rCard.style.color = c.name;
-    rRate.style.color = c.rate;
-    rCard.textContent = match.card;
-    rRate.textContent = match.rate;
-    rWhy.textContent = match.why;
-    rWhy.style.color = '#aaa';
-    result.classList.add('visible');
-  } else {
-    rCard.style.color = '#fb923c';
-    rRate.style.color = '#fdba74';
-    result.style.background = 'rgba(251,146,60,0.08)';
-    rCard.textContent = 'Capital One Quicksilver';
-    rRate.textContent = '1.5% cash back';
-    rWhy.textContent = 'Default catch-all — always earns something.';
-    rWhy.style.color = '#aaa';
-    result.classList.add('visible');
-  }
-});
+function buildCompareTable() {
+  const region = detectLandingRegion();
+  const data = REGION_COMPARE[region] || REGION_COMPARE.us;
+  const [c1, c2] = data.competitors;
+
+  const check = v => {
+    if (v === '✓') return `<span class="check">✓</span>`;
+    if (v === '✕') return `<span class="cross">✕</span>`;
+    return `<span class="maybe">${v}</span>`;
+  };
+
+  document.getElementById('compareTitle').innerHTML =
+    `WhichCard? vs. <em style="font-style:normal;color:var(--muted2)">${c1}</em> & <em style="font-style:normal;color:var(--muted2)">${c2}</em>`;
+
+  document.getElementById('compareNote').textContent = data.note;
+
+  document.getElementById('compareTable').innerHTML = `
+    <thead>
+      <tr>
+        <th>Feature</th>
+        <th class="accent-col">WhichCard?</th>
+        <th style="color:var(--muted2)">${c1}</th>
+        <th style="color:var(--muted2)">${c2}</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${data.rows.map(r => `
+        <tr>
+          <td>${r.feature}</td>
+          <td>${check(r.wc)}</td>
+          <td>${check(r.c1)}</td>
+          <td>${check(r.c2)}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  `;
+}
+
+buildCompareTable();
 </script>
 
 </body>

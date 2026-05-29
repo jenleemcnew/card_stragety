@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Which Card?</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Which Card?">
+<meta name="theme-color" content="#080808">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --bg: #080808;
+  --surface: #111;
+  --surface2: #181818;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #f0ede8;
+  --muted: #666;
+  --muted2: #999;
+  --accent: #86efac;
+  --accent-dim: rgba(134,239,172,0.12);
+  --red: #ff5757;
+  --green: #4ade80;
+  --blue: #60a5fa;
+  --purple: #a78bfa;
+  --orange: #fb923c;
+}
+
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; overflow-x: hidden; }
+
+/* ── SCREENS ── */
+.screen { display: none; min-height: 100vh; flex-direction: column; }
+.screen.active { display: flex; }
+
+/* ── ONBOARDING ── */
+#screen-onboard {
+  background: var(--bg);
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.onboard-bg {
+  position: absolute; inset: 0; z-index: 0;
+  background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(134,239,172,0.07) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.onboard-content {
+  position: relative; z-index: 1;
+  display: flex; flex-direction: column;
+  min-height: 100vh;
+  padding: 60px 28px 40px;
+}
+
+.onboard-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(134,239,172,0.2);
+  border-radius: 100px;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+  width: fit-content;
+}
+
+.onboard-headline {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(38px, 10vw, 52px);
+  font-weight: 800;
+  line-height: 1.0;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+
+.onboard-headline .hl { color: var(--accent); }
+
+.onboard-sub {
+  font-size: 15px;
+  color: var(--muted2);
+  line-height: 1.6;
+  font-weight: 300;
+  margin-bottom: 40px;
+  max-width: 340px;
+}
+
+.onboard-features {
+  display: flex; flex-direction: column; gap: 14px;
+  margin-bottom: 48px;
+}
+
+.feat {
+  display: flex; align-items: flex-start; gap: 12px;
+}
+
+.feat-icon {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.feat-text { font-size: 14px; color: var(--muted2); line-height: 1.5; }
+.feat-text strong { color: var(--text); font-weight: 500; }
+
+.onboard-cta {
+  margin-top: auto;
+}
+
+.btn-primary {
+  width: 100%;
+  background: var(--accent);
+  color: #080808;
+  border: none;
+  border-radius: 14px;
+  padding: 18px 24px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.15s;
+}
+.btn-primary:active { transform: scale(0.97); opacity: 0.9; }
+
+.btn-ghost {
+  width: 100%;
+  background: transparent;
+  color: var(--muted2);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 16px 24px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  margin-top: 10px;
+}
+.btn-ghost:active { border-color: var(--accent); color: var(--accent); }
+
+/* ── ADD CARDS SCREEN ── */
+#screen-add {
+  background: var(--bg);
+  padding: 0;
+}
+
+.add-header {
+  padding: 52px 24px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.back-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: none; border: none; color: var(--muted2);
+  font-size: 14px; cursor: pointer; padding: 0;
+  margin-bottom: 20px;
+}
+
+.add-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 28px; font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.add-sub {
+  font-size: 13px; color: var(--muted); line-height: 1.5;
+}
+
+.add-body { padding: 20px 24px; flex: 1; overflow-y: auto; }
+
+.search-box-wrap { position: relative; margin-bottom: 8px; }
+
+.card-search-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 14px 16px 14px 44px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.card-search-input::placeholder { color: var(--muted); }
+.card-search-input:focus { border-color: var(--accent); }
+
+.search-icon {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  font-size: 18px; pointer-events: none;
+}
+
+.search-hint {
+  font-size: 12px; color: var(--muted); margin-bottom: 20px; padding-left: 4px;
+}
+
+/* AI lookup state */
+.ai-lookup-area {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
+  display: none;
+}
+.ai-lookup-area.visible { display: block; }
+
+.ai-lookup-status {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; color: var(--muted2);
+  margin-bottom: 0;
+}
+
+.ai-spinner {
+  width: 18px; height: 18px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.ai-result-card {
+  display: none;
+}
+.ai-result-card.visible { display: block; }
+
+.ai-card-preview {
+  display: flex; align-items: flex-start; gap: 12px;
+  margin-bottom: 14px;
+}
+
+.ai-card-icon {
+  width: 44px; height: 28px; border-radius: 6px;
+  background: linear-gradient(135deg, #333, #222);
+  border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.ai-card-name {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 16px; font-weight: 700; color: var(--text);
+  margin-bottom: 4px; letter-spacing: -0.02em;
+}
+
+.ai-card-issuer { font-size: 12px; color: var(--muted2); }
+
+.ai-categories { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+
+.ai-cat-pill {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--surface2);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+.ai-cat-name { color: var(--muted2); }
+.ai-cat-rate { font-weight: 600; color: var(--accent); }
+
+.ai-caveats {
+  font-size: 12px; color: var(--muted);
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  padding: 10px 12px;
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+.btn-add-card {
+  width: 100%;
+  background: var(--accent);
+  color: #080808;
+  border: none;
+  border-radius: 10px;
+  padding: 13px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px; font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+.btn-add-card:active { transform: scale(0.97); }
+
+/* My cards list in add screen */
+.my-cards-section { margin-top: 8px; }
+.my-cards-label {
+  font-size: 11px; color: var(--muted); text-transform: uppercase;
+  letter-spacing: 0.08em; margin-bottom: 10px;
+}
+
+.my-card-item {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface);
+  border: 1px solid rgba(255,255,255,0.28);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+
+.my-card-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
+
+.my-card-info { flex: 1; }
+.my-card-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.my-card-cats { font-size: 12px; color: var(--muted2); margin-top: 2px; }
+
+.btn-remove {
+  background: rgba(255,87,87,0.08);
+  border: 1px solid rgba(255,87,87,0.2);
+  border-radius: 8px;
+  color: var(--muted2);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 5px 10px;
+  line-height: 1;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn-remove:active { background: rgba(255,87,87,0.2); color: var(--red); border-color: var(--red); }
+
+.add-footer {
+  padding: 16px 24px 40px;
+  border-top: 1px solid var(--border);
+}
+
+/* ── MAIN APP SCREEN ── */
+#screen-app {
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+.app-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 52px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 50;
+  background: var(--bg);
+}
+
+.app-logo {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 20px; font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
+.app-logo span { color: var(--accent); }
+
+.topbar-actions { display: flex; gap: 8px; }
+
+.icon-btn {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; cursor: pointer;
+  transition: border-color 0.15s;
+}
+.icon-btn:active { border-color: var(--accent); }
+
+/* Quick lookup */
+.lookup-section { padding: 16px 24px; }
+
+.lookup-label {
+  font-size: 11px; color: var(--muted); text-transform: uppercase;
+  letter-spacing: 0.08em; margin-bottom: 8px;
+}
+
+.lookup-input-wrap { position: relative; }
+
+.lookup-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 14px;
+  padding: 16px 16px 16px 48px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.lookup-input::placeholder { color: var(--muted); }
+.lookup-input:focus { border-color: var(--accent); }
+
+.lookup-search-icon {
+  position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+  font-size: 20px; pointer-events: none;
+}
+
+/* Result card */
+.result-card {
+  margin-top: 10px;
+  border-radius: 14px;
+  padding: 16px;
+  display: none;
+  animation: fadeUp 0.2s ease;
+}
+.result-card.visible { display: block; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.result-top {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 8px;
+}
+
+.result-card-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
+
+.result-card-name {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 18px; font-weight: 700;
+  letter-spacing: -0.02em;
+  flex: 1;
+}
+
+.result-rate {
+  font-size: 22px; font-weight: 700;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.03em;
+  margin-bottom: 4px;
+}
+
+.result-why {
+  font-size: 13px; color: rgba(255,255,255,0.5);
+  line-height: 1.5;
+}
+
+/* No match state */
+.result-nocard {
+  display: none;
+  margin-top: 10px;
+  padding: 14px 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  font-size: 13px; color: var(--muted2);
+  line-height: 1.5;
+}
+.result-nocard.visible { display: block; }
+
+/* Empty state */
+.empty-state {
+  padding: 40px 24px;
+  text-align: center;
+  display: none;
+}
+.empty-state.visible { display: block; }
+.empty-icon { font-size: 48px; margin-bottom: 16px; }
+.empty-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 22px; font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+.empty-sub { font-size: 14px; color: var(--muted2); line-height: 1.6; margin-bottom: 24px; }
+
+/* Cards section */
+.cards-section { padding: 0 24px 24px; }
+.cards-section-label {
+  font-size: 11px; color: var(--muted); text-transform: uppercase;
+  letter-spacing: 0.08em; margin-bottom: 12px;
+  padding-top: 16px;
+}
+
+.card-block {
+  background: var(--surface);
+  border: 1px solid rgba(255,255,255,0.28);
+  border-radius: 16px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.card-block.open { border-color: rgba(255,255,255,0.38); }
+
+.card-block-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.card-block-dot {
+  width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+}
+
+.card-block-info { flex: 1; }
+.card-block-name { font-size: 15px; font-weight: 600; color: var(--text); }
+.card-block-top-cat { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.card-block-chevron {
+  font-size: 12px; color: var(--muted);
+  transition: transform 0.25s;
+}
+.card-block.open .card-block-chevron { transform: rotate(180deg); }
+
+.card-block-body {
+  display: none;
+  padding: 0 14px 14px;
+  border-top: 1px solid var(--border);
+}
+.card-block.open .card-block-body { display: block; }
+
+.cb-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  gap: 8px;
+}
+.cb-row:last-child { border-bottom: none; }
+.cb-cat { font-size: 13px; color: #bbb; flex: 1; }
+.cb-rate { font-size: 13px; font-weight: 600; white-space: nowrap; }
+
+.cb-note {
+  font-size: 11px; color: var(--muted);
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px; padding: 8px 10px;
+  margin-top: 10px; line-height: 1.5;
+}
+
+/* Loading overlay */
+.ai-loading-bar {
+  height: 2px;
+  background: var(--surface2);
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+  margin: 8px 0;
+  display: none;
+}
+.ai-loading-bar.active { display: block; }
+.ai-loading-bar::after {
+  content: '';
+  position: absolute; left: -60%; top: 0;
+  width: 60%; height: 100%;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  animation: loading-sweep 1.2s infinite;
+}
+@keyframes loading-sweep {
+  to { left: 110%; }
+}
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-radius: 100px;
+  padding: 10px 20px;
+  font-size: 13px; color: var(--text);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 999;
+  pointer-events: none;
+}
+.toast.show {
+  opacity: 1; transform: translateX(-50%) translateY(0);
+}
+
+/* Lookup AI thinking state */
+.lookup-thinking {
+  display: none;
+  margin-top: 10px;
+  padding: 14px 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px; color: var(--muted2);
+}
+.lookup-thinking.visible { display: flex; }
+
+/* Responsive tweaks */
+@media (min-width: 430px) {
+  .onboard-content { padding: 70px 36px 50px; }
+}
+
+@media (min-width: 768px) {
+  .onboard-content {
+    padding: 80px 8% 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+    gap: 0 60px;
+    align-items: center;
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .onboard-badge { grid-column: 1; grid-row: 1; align-self: end; }
+  .onboard-headline { grid-column: 1; grid-row: 2; font-size: clamp(48px, 5vw, 72px); }
+  .onboard-sub { grid-column: 1; grid-row: 3; }
+  .onboard-features {
+    grid-column: 2;
+    grid-row: 1 / 5;
+    align-self: center;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 32px 28px;
+    margin-bottom: 0;
+  }
+  .onboard-cta {
+    grid-column: 1;
+    grid-row: 4;
+    margin-top: 0;
+  }
+  .btn-primary, .btn-ghost { max-width: 360px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     SCREEN 1: ONBOARDING
+══════════════════════════════════════ -->
+<div class="screen active" id="screen-onboard">
+  <div class="onboard-bg"></div>
+  <div class="onboard-content">
+    <div class="onboard-badge">✦ AI-Powered</div>
+    <h1 class="onboard-headline">
+      Which card<br>do I <span class="hl">swipe?</span>
+    </h1>
+    <p class="onboard-sub">
+      Add your cards once. Get instant answers on which card earns you the most — for anything you buy.
+    </p>
+    <div class="onboard-features">
+      <div style="font-size:11px; color:var(--muted2); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:20px; font-weight:600;">Why it matters</div>
+      <div class="feat">
+        <div class="feat-icon">🃏</div>
+        <div class="feat-text"><strong>Any card, any issuer.</strong> Type your card name and AI instantly pulls the full reward structure.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">⚡</div>
+        <div class="feat-text"><strong>Instant lookup.</strong> Type what you're buying — gas, dinner, flights — and get the answer in one tap.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">💾</div>
+        <div class="feat-text"><strong>Saved on your device.</strong> Your card lineup is stored locally. No account needed.</div>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">🔒</div>
+        <div class="feat-text"><strong>Completely private.</strong> No account, no bank link, no personal data. Ever.</div>
+      </div>
+      <div style="margin-top:24px; padding:16px; background:var(--accent-dim); border:1px solid rgba(134,239,172,0.2); border-radius:12px;">
+        <div style="font-family:'Plus Jakarta Sans',sans-serif; font-size:28px; font-weight:800; color:var(--accent); letter-spacing:-0.03em;">$583</div>
+        <div style="font-size:12px; color:var(--muted2); margin-top:4px; line-height:1.5;">avg. household rewards left unclaimed per year — WalletHub, 2024</div>
+      </div>
+    </div>
+    <div class="onboard-cta">
+      <button class="btn-primary" onclick="goToAddCards(true)">Set up my cards →</button>
+      <button class="btn-ghost" onclick="loadDemoCards()">See a demo first</button>
+      <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.5;padding: 0 8px;">
+        📍 We use your timezone to suggest regional cards. No location data is stored or shared. If you prefer, we default to the US card database — AI lookup works everywhere regardless.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 2: ADD / MANAGE CARDS
+══════════════════════════════════════ -->
+<div class="screen" id="screen-add">
+  <div class="add-header">
+    <button class="back-btn" id="addBackBtn" onclick="goBack()">← Back</button>
+    <div class="add-title">Your cards</div>
+    <div class="add-sub">Type a card name and AI will find its reward structure automatically.</div>
+  </div>
+
+  <div class="add-body" id="addBody">
+    <div class="search-box-wrap">
+      <span class="search-icon">🔍</span>
+      <input
+        class="card-search-input"
+        id="cardSearchInput"
+        type="text"
+        placeholder="e.g. Chase Sapphire Preferred..."
+        autocomplete="off"
+        autocorrect="off"
+      >
+    </div>
+    <div class="search-hint" id="searchHint">Type your full card name for best results</div>
+
+    <div class="ai-loading-bar" id="aiLoadingBar"></div>
+
+    <!-- AI lookup result -->
+    <div class="ai-lookup-area" id="aiLookupArea">
+      <div class="ai-lookup-status" id="aiLookupStatus">
+        <div class="ai-spinner"></div>
+        <span id="aiStatusText">Looking up reward structure…</span>
+      </div>
+      <div class="ai-result-card" id="aiResultCard">
+        <div class="ai-card-preview">
+          <div class="ai-card-icon" id="previewIcon">💳</div>
+          <div>
+            <div class="ai-card-name" id="previewName"></div>
+            <div class="ai-card-issuer" id="previewIssuer"></div>
+          </div>
+        </div>
+        <div class="ai-categories" id="previewCats"></div>
+        <div class="ai-caveats" id="previewCaveats"></div>
+        <button class="btn-add-card" id="btnAddCard" onclick="confirmAddCard()">Add this card ✓</button>
+      </div>
+    </div>
+
+    <!-- My cards -->
+    <div class="my-cards-section" id="myCardsSection">
+      <div class="my-cards-label">My cards (<span id="myCardsCount">0</span>)</div>
+      <div id="myCardsList"></div>
+    </div>
+  </div>
+
+  <div class="add-footer">
+    <button class="btn-primary" id="addDoneBtn" onclick="goToApp()" style="display:none;">Done — show my wallet →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCREEN 3: MAIN APP
+══════════════════════════════════════ -->
+<div class="screen" id="screen-app">
+  <div class="app-topbar">
+    <div class="app-logo">Which<span>Card</span>?</div>
+    <div class="topbar-actions">
+      <div class="icon-btn" onclick="goToAddCards(false)" title="Add or remove cards" style="width:auto; padding: 0 12px; font-size:13px; gap:6px; display:flex; align-items:center;">
+        <span>💳</span><span style="color:var(--muted2);">Edit cards</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick lookup -->
+  <div class="lookup-section">
+    <div class="lookup-label">What are you buying?</div>
+    <div class="lookup-input-wrap">
+      <span class="lookup-search-icon">🛒</span>
+      <input
+        class="lookup-input"
+        id="lookupInput"
+        type="text"
+        placeholder="gas, dinner, flights, Netflix…"
+        autocomplete="off"
+        autocorrect="off"
+      >
+    </div>
+
+    <!-- AI thinking -->
+    <div class="lookup-thinking" id="lookupThinking">
+      <div class="ai-spinner"></div>
+      <span>Checking your cards…</span>
+    </div>
+
+    <!-- Result -->
+    <div class="result-card" id="resultCard">
+      <div class="result-top">
+        <div class="result-card-dot" id="resultDot"></div>
+        <div class="result-card-name" id="resultName"></div>
+      </div>
+      <div class="result-rate" id="resultRate"></div>
+      <div class="result-why" id="resultWhy"></div>
+    </div>
+
+    <!-- No match -->
+    <div class="result-nocard" id="resultNoCard"></div>
+  </div>
+
+  <!-- Empty state (no cards yet) -->
+  <div class="empty-state" id="emptyState">
+    <div class="empty-icon">🃏</div>
+    <div class="empty-title">No cards yet</div>
+    <div class="empty-sub">Add your cards and AI will build your personalized reward strategy.</div>
+    <button class="btn-primary" style="max-width:240px;margin:0 auto;" onclick="goToAddCards(false)">Add my cards →</button>
+  </div>
+
+  <!-- Cards breakdown -->
+  <div class="cards-section" id="cardsSection" style="display:none;">
+    <div style="display:flex; align-items:center; justify-content:space-between; padding-top:16px; margin-bottom:12px;">
+      <div class="cards-section-label" style="padding-top:0; margin-bottom:0;">My wallet</div>
+      <button onclick="goToAddCards(false)" style="background:none; border:none; color:var(--muted2); font-size:12px; cursor:pointer; display:flex; align-items:center; gap:5px; padding:4px 0;">
+        <span style="font-size:14px;">✏️</span> Add or remove cards
+      </button>
+    </div>
+    <div id="cardBlocksContainer"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────
+// STATE
+// ─────────────────────────────────────
+let myCards = []; // array of card objects
+let pendingCard = null; // card being previewed before add
+let isLookupDebounce = null;
+
+// Muted, desaturated brand-matched colors — easy on sensitive eyes
+const ISSUER_COLORS = {
+  // Chase — richer royal blue
+  'chase':           '#4a7ab5',
+  // American Express — iconic AmEx green (muted)
+  'american express':'#5a9e78',
+  'amex':            '#5a9e78',
+  // Citi — warm steel teal (clearly different from Chase)
+  'citi':            '#6a9aaa',
+  // Capital One — warm muted burgundy
+  'capital one':     '#a06060',
+  // Credit One — muted sage green
+  'credit one':      '#6a9e7a',
+  // Discover — warm muted amber
+  'discover':        '#b88a5a',
+  // Bank of America — muted rose red
+  'bank of america': '#a06070',
+  // Wells Fargo — dusty amber
+  'wells fargo':     '#a08a50',
+  // US Bank — soft teal
+  'us bank':         '#5a8f8f',
+  // Barclays — muted periwinkle
+  'barclays':        '#7070aa',
+  // HSBC — muted red
+  'hsbc':            '#aa6060',
+  // Lloyds — muted green
+  'lloyds':          '#5a8a68',
+  // Santander — muted red
+  'santander':       '#a05050',
+  // TD — muted green
+  'td ':             '#5a8a60',
+  // RBC — muted blue
+  'rbc':             '#5870a0',
+  // Scotia — warm red
+  'scotia':          '#985858',
+};
+
+// Fallback palette — all muted, low-saturation, varied hues
+const FALLBACK_COLORS = [
+  '#7a8faa', '#8a9e7a', '#a09060', '#8a7aaa',
+  '#9a7a70', '#7a9e9a', '#aa8a60', '#8a8aaa',
+];
+
+function getCardColor(idx, issuerName) {
+  if (issuerName) {
+    const key = issuerName.toLowerCase();
+    for (const [brand, color] of Object.entries(ISSUER_COLORS)) {
+      if (key.includes(brand)) return color;
+    }
+  }
+  return FALLBACK_COLORS[idx % FALLBACK_COLORS.length];
+}
+
+// ─────────────────────────────────────
+// PERSISTENCE
+// ─────────────────────────────────────
+function saveCards() {
+  try { localStorage.setItem('whichcard_v1', JSON.stringify(myCards)); } catch(e) {}
+}
+
+function loadCards() {
+  try {
+    const raw = localStorage.getItem('whichcard_v1');
+    if (raw) {
+      myCards = JSON.parse(raw);
+      // Migrate: re-apply brand colors to any card using old bright palette
+      const oldBrights = ['#4ade80','#a78bfa','#60a5fa','#fb923c','#f472b6','#34d399','#fbbf24','#f87171'];
+      myCards = myCards.map((c, i) => {
+        if (!c.color || oldBrights.includes(c.color)) {
+          return { ...c, color: getCardColor(i, c.issuer) };
+        }
+        return c;
+      });
+      saveCards();
+    }
+  } catch(e) { myCards = []; }
+}
+
+// ─────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goToAddCards(fromOnboard) {
+  document.getElementById('addBackBtn').style.display = fromOnboard ? 'none' : 'flex';
+  document.getElementById('cardSearchInput').value = '';
+  resetAiLookup();
+  renderMyCardsList();
+  showScreen('screen-add');
+}
+
+function goBack() { showScreen('screen-app'); }
+
+function goToApp() {
+  renderApp();
+  showScreen('screen-app');
+}
+
+// ─────────────────────────────────────
+// DEMO MODE
+// ─────────────────────────────────────
+function loadDemoCards() {
+  myCards = [
+    {
+      id: 'demo1',
+      name: 'Chase Sapphire Preferred',
+      issuer: 'Chase',
+      color: getCardColor(0, 'Chase'),
+      categories: [
+        { name: 'Chase Travel portal', rate: '5x points' },
+        { name: 'Streaming services', rate: '3x points' },
+        { name: 'Dining & restaurants', rate: '3x points' },
+        { name: 'All other travel', rate: '2x points' },
+        { name: 'Everything else', rate: '1x points' }
+      ],
+      caveats: 'Annual fee: $95. Points transfer to United, Hyatt, and more at 1:1.',
+      keywords: ['travel','hotel','flight','airline','streaming','netflix','hulu','disney','restaurant','dining','dinner','lunch']
+    },
+    {
+      id: 'demo2',
+      name: 'Citi Double Cash',
+      issuer: 'Citi',
+      color: getCardColor(1, 'Citi'),
+      categories: [
+        { name: 'Everything (when you pay)', rate: '2% cash back' },
+        { name: 'Purchase earn rate', rate: '1% cash back' }
+      ],
+      caveats: 'No annual fee. 1% when you buy + 1% when you pay the bill.',
+      keywords: []
+    }
+  ];
+  saveCards();
+  renderApp();
+  showScreen('screen-app');
+}
+
+// ─────────────────────────────────────
+// ADD CARDS SCREEN
+// ─────────────────────────────────────
+let searchTimeout = null;
+
+document.getElementById('cardSearchInput').addEventListener('input', function() {
+  const val = this.value.trim();
+  clearTimeout(searchTimeout);
+  resetAiLookup();
+  if (val.length < 4) return;
+  searchTimeout = setTimeout(() => lookupCard(val), 800);
+});
+
+function resetAiLookup() {
+  pendingCard = null;
+  document.getElementById('aiLookupArea').classList.remove('visible');
+  document.getElementById('aiLoadingBar').classList.remove('active');
+  document.getElementById('aiResultCard').classList.remove('visible');
+  document.getElementById('aiLookupStatus').style.display = 'flex';
+  document.getElementById('searchHint').textContent = 'Type your full card name for best results';
+}
+
+// ─────────────────────────────────────
+// REGION DETECTION
+// ─────────────────────────────────────
+let userRegion = localStorage.getItem('whichcard_region') || 'us';
+
+function detectRegion() {
+  // Check if we already know
+  if (localStorage.getItem('whichcard_region')) return;
+  // Try timezone-based detection first (no permission needed)
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    if (/Europe/.test(tz)) userRegion = 'uk';
+    else if (/Australia|Pacific\/Auckland/.test(tz)) userRegion = 'au';
+    else if (/Canada|America\/Toronto|America\/Vancouver/.test(tz)) userRegion = 'ca';
+    else userRegion = 'us';
+    localStorage.setItem('whichcard_region', userRegion);
+  } catch(e) { userRegion = 'us'; }
+}
+
+detectRegion();
+
+// Regional card databases
+const CARD_DB_UK = {
+  'barclaycard avios': {
+    name: 'Barclaycard Avios Plus', issuer: 'Barclays',
+    categories: [
+      { name: 'Flights (British Airways)', rate: '3 Avios per £1' },
+      { name: 'Everything else', rate: '1.5 Avios per £1' }
+    ],
+    caveats: '£20/month fee. Free companion voucher when you spend £10,000/year.',
+    keywords: ['flight','flights','british airways','ba','travel','hotel']
+  },
+  'amex gold uk': {
+    name: 'American Express Preferred Rewards Gold', issuer: 'American Express',
+    categories: [
+      { name: 'Supermarkets & petrol', rate: '2x Membership Rewards' },
+      { name: 'Everything else', rate: '1x Membership Rewards' }
+    ],
+    caveats: 'Free first year, then £140/year. Points transfer to Avios, Marriott Bonvoy, and more.',
+    keywords: ['supermarket','tesco','sainsburys','petrol','fuel','gas']
+  },
+  'natwest rewards': {
+    name: 'NatWest Rewards Credit Card', issuer: 'NatWest',
+    categories: [
+      { name: 'Supermarkets', rate: '2% cashback' },
+      { name: 'Fuel', rate: '1% cashback' },
+      { name: 'Everything else', rate: '0.5% cashback' }
+    ],
+    caveats: '£3/month fee waived if you hold a NatWest Reward current account.',
+    keywords: ['supermarket','tesco','sainsburys','asda','fuel','petrol']
+  },
+};
+
+const CARD_DB_CA = {
+  'td cash back visa infinite': {
+    name: 'TD Cash Back Visa Infinite', issuer: 'TD',
+    categories: [
+      { name: 'Groceries & recurring bill payments', rate: '3% cash back' },
+      { name: 'Gas & transit', rate: '3% cash back' },
+      { name: 'Everything else', rate: '1% cash back' }
+    ],
+    caveats: '$139/year fee (waived first year). TD Auto Club membership included.',
+    keywords: ['grocery','groceries','gas','fuel','transit','bill','phone','streaming']
+  },
+  'scotiabank gold amex': {
+    name: 'Scotiabank Gold American Express', issuer: 'Scotia',
+    categories: [
+      { name: 'Groceries, dining & entertainment', rate: '6x Scene+ points' },
+      { name: 'Gas, transit & streaming', rate: '4x Scene+ points' },
+      { name: 'Everything else', rate: '1x Scene+ points' }
+    ],
+    caveats: '$120/year. No foreign transaction fees. Points redeem for travel and more.',
+    keywords: ['grocery','groceries','dining','dinner','restaurant','entertainment','gas','transit','streaming','netflix']
+  },
+};
+
+const CARD_DB_AU = {
+  'qantas premier platinum': {
+    name: 'Qantas Premier Platinum Mastercard', issuer: 'Qantas',
+    categories: [
+      { name: 'Qantas products & services', rate: '2 Qantas Points per $1' },
+      { name: 'Overseas purchases', rate: '1.5 Qantas Points per $1' },
+      { name: 'Everything else', rate: '1 Qantas Point per $1' }
+    ],
+    caveats: '$299/year. Complimentary Qantas Club lounge invitations and travel insurance.',
+    keywords: ['qantas','flight','travel','overseas','international']
+  },
+  'commbank awards': {
+    name: 'CommBank Awards Credit Card', issuer: 'Commonwealth Bank',
+    categories: [
+      { name: 'Eligible purchases (overseas)', rate: '2 Awards points per $1' },
+      { name: 'Everything else', rate: '1 Awards point per $1' }
+    ],
+    caveats: '$59/year. Points transfer to frequent flyer programs.',
+    keywords: ['overseas','international','travel']
+  },
+};
+
+function getRegionalDB() {
+  switch(userRegion) {
+    case 'uk': return { ...CARD_DB_UK, ...CARD_DB };
+    case 'ca': return { ...CARD_DB_CA, ...CARD_DB };
+    case 'au': return { ...CARD_DB_AU, ...CARD_DB };
+    default:   return CARD_DB;
+  }
+}
+
+// ─────────────────────────────────────
+// BUILT-IN CARD DATABASE (fallback for offline / local file use)
+// ─────────────────────────────────────
+const CARD_DB = {
+  'credit one x5': {
+    name: 'Credit One Bank Platinum X5 Visa', issuer: 'Credit One Bank',
+    categories: [
+      { name: 'Gas stations', rate: '5% cash back' },
+      { name: 'Groceries (supermarkets only)', rate: '5% cash back' },
+      { name: 'Internet / cable / satellite TV', rate: '5% cash back' },
+      { name: 'Mobile phone bill', rate: '5% cash back' },
+      { name: 'Everything else', rate: '1% cash back' }
+    ],
+    caveats: '$5,000/yr combined cap on all 5% categories; Walmart, Target, and Costco do NOT qualify for 5%.',
+    keywords: ['gas','fuel','gasoline','grocery','groceries','supermarket','heb','kroger','safeway','whole foods','sprouts','internet','wifi','cable','satellite','dish','directv','phone','mobile','tmobile','t-mobile','verizon','at&t','frontier','spectrum']
+  },
+  'credit one platinum x5': {
+    name: 'Credit One Bank Platinum X5 Visa', issuer: 'Credit One Bank',
+    categories: [
+      { name: 'Gas stations', rate: '5% cash back' },
+      { name: 'Groceries (supermarkets only)', rate: '5% cash back' },
+      { name: 'Internet / cable / satellite TV', rate: '5% cash back' },
+      { name: 'Mobile phone bill', rate: '5% cash back' },
+      { name: 'Everything else', rate: '1% cash back' }
+    ],
+    caveats: '$5,000/yr combined cap on all 5% categories; Walmart, Target, and Costco do NOT qualify for 5%.',
+    keywords: ['gas','fuel','gasoline','grocery','groceries','supermarket','heb','kroger','internet','wifi','cable','satellite','phone','mobile','tmobile']
+  },
+  'citi strata premier': {
+    name: 'Citi Strata Premier Card', issuer: 'Citi',
+    categories: [
+      { name: 'Hotels via CitiTravel.com', rate: '10x points' },
+      { name: 'Flights (booked direct)', rate: '3x points' },
+      { name: 'Restaurants & dining', rate: '3x points' },
+      { name: 'Supermarkets', rate: '3x points' },
+      { name: 'Gas stations', rate: '3x points' },
+      { name: 'Hotels booked direct', rate: '3x points' },
+      { name: 'Everything else', rate: '1x points' }
+    ],
+    caveats: '$95 annual fee. $100 hotel credit on $500+ hotel stays via CitiTravel. Points transfer to United, Avianca, and others at 1:1.',
+    keywords: ['hotel','hotels','flight','flights','airline','airfare','united','restaurant','dining','dinner','lunch','eat','food','grocery','groceries','supermarket','heb','kroger','gas','fuel','travel','marriott','hilton','hyatt']
+  },
+  'strata premier': {
+    name: 'Citi Strata Premier Card', issuer: 'Citi',
+    categories: [
+      { name: 'Hotels via CitiTravel.com', rate: '10x points' },
+      { name: 'Flights, restaurants, supermarkets, gas', rate: '3x points' },
+      { name: 'Everything else', rate: '1x points' }
+    ],
+    caveats: '$95 annual fee. $100 hotel credit on $500+ stays via CitiTravel. Points transfer to United 1:1.',
+    keywords: ['hotel','flight','airline','restaurant','dining','dinner','food','grocery','gas','travel']
+  },
+  'chase sapphire preferred': {
+    name: 'Chase Sapphire Preferred', issuer: 'Chase',
+    categories: [
+      { name: 'Chase Travel portal', rate: '5x points' },
+      { name: 'Lyft (through Sept 2027)', rate: '5x points' },
+      { name: 'Streaming services', rate: '3x points' },
+      { name: 'Dining & restaurants', rate: '3x points' },
+      { name: 'Rental cars', rate: '2x + primary insurance' },
+      { name: 'All other travel', rate: '2x points' },
+      { name: 'Everything else', rate: '1x points' }
+    ],
+    caveats: '$95 annual fee. Primary rental car insurance included. Points transfer to United, Hyatt, IHG, and more at 1:1.',
+    keywords: ['travel','hotel','flight','airline','streaming','netflix','hulu','disney','hbo','max','spotify','restaurant','dining','dinner','lunch','eat','rental car','enterprise','hertz','lyft','cruise']
+  },
+  'sapphire preferred': {
+    name: 'Chase Sapphire Preferred', issuer: 'Chase',
+    categories: [
+      { name: 'Chase Travel portal', rate: '5x points' },
+      { name: 'Streaming & dining', rate: '3x points' },
+      { name: 'All other travel', rate: '2x points' },
+      { name: 'Everything else', rate: '1x points' }
+    ],
+    caveats: '$95 annual fee. Primary rental car insurance. Transfers to United, Hyatt, IHG at 1:1.',
+    keywords: ['travel','hotel','flight','streaming','netflix','dining','dinner','restaurant','rental car','lyft']
+  },
+  'capital one quicksilver': {
+    name: 'Capital One Quicksilver', issuer: 'Capital One',
+    categories: [
+      { name: 'Everything', rate: '1.5% cash back' }
+    ],
+    caveats: 'No annual fee. Flat 1.5% on every purchase — no categories to track.',
+    keywords: []
+  },
+  'quicksilver': {
+    name: 'Capital One Quicksilver', issuer: 'Capital One',
+    categories: [{ name: 'Everything', rate: '1.5% cash back' }],
+    caveats: 'No annual fee. Flat 1.5% on every purchase.',
+    keywords: []
+  },
+  'chase freedom unlimited': {
+    name: 'Chase Freedom Unlimited', issuer: 'Chase',
+    categories: [
+      { name: 'Chase Travel portal', rate: '5% cash back' },
+      { name: 'Dining & drugstores', rate: '3% cash back' },
+      { name: 'Everything else', rate: '1.5% cash back' }
+    ],
+    caveats: 'No annual fee. Cash back is actually Chase Ultimate Rewards points redeemable for travel.',
+    keywords: ['travel','dining','dinner','restaurant','drugstore','pharmacy','walgreens','cvs']
+  },
+  'amex gold': {
+    name: 'American Express Gold Card', issuer: 'American Express',
+    categories: [
+      { name: 'Restaurants (worldwide)', rate: '4x points' },
+      { name: 'U.S. supermarkets (up to $25k/yr)', rate: '4x points' },
+      { name: 'Flights booked direct', rate: '3x points' },
+      { name: 'Everything else', rate: '1x points' }
+    ],
+    caveats: '$250 annual fee. $120 dining credit + $120 Uber Cash annually. Points transfer to Delta, United, Marriott, and more.',
+    keywords: ['restaurant','dining','dinner','lunch','food','eat','grocery','supermarket','flight','airline']
+  },
+  'amex platinum': {
+    name: 'American Express Platinum Card', issuer: 'American Express',
+    categories: [
+      { name: 'Flights booked direct or via Amex Travel', rate: '5x points' },
+      { name: 'Hotels via Amex Travel', rate: '5x points' },
+      { name: 'Everything else', rate: '1x points' }
+    ],
+    caveats: '$695 annual fee. Extensive credits (airline, hotel, Uber, etc.) can offset the fee. Lounge access included.',
+    keywords: ['flight','airline','hotel','travel']
+  },
+  'discover it': {
+    name: 'Discover it Cash Back', issuer: 'Discover',
+    categories: [
+      { name: 'Rotating 5% categories (activated quarterly)', rate: '5% cash back' },
+      { name: 'Everything else', rate: '1% cash back' }
+    ],
+    caveats: 'No annual fee. 5% categories rotate quarterly (gas, groceries, restaurants, Amazon, etc.) — must activate each quarter. First-year cashback matched.',
+    keywords: ['gas','grocery','restaurant','amazon','wholesale','home improvement']
+  },
+  'citi double cash': {
+    name: 'Citi Double Cash Card', issuer: 'Citi',
+    categories: [
+      { name: 'Everything (1% buy + 1% pay)', rate: '2% cash back' }
+    ],
+    caveats: 'No annual fee. Effectively 2% on everything — 1% when you buy, 1% when you pay the statement.',
+    keywords: []
+  }
+};
+
+function localCardLookup(cardName) {
+  const db = getRegionalDB();
+  const key = cardName.toLowerCase().trim();
+  if (db[key]) return db[key];
+  for (const dbKey of Object.keys(db)) {
+    if (key.includes(dbKey) || dbKey.includes(key)) return db[dbKey];
+  }
+  return null;
+}
+
+async function lookupCard(cardName) {
+  document.getElementById('aiLookupArea').classList.add('visible');
+  document.getElementById('aiLookupStatus').style.display = 'flex';
+  document.getElementById('aiResultCard').classList.remove('visible');
+  document.getElementById('aiLoadingBar').classList.add('active');
+  document.getElementById('aiStatusText').textContent = `Looking up "${cardName}"…`;
+  document.getElementById('searchHint').textContent = '';
+
+  // Try built-in database first (works offline/local)
+  const dbMatch = localCardLookup(cardName);
+  if (dbMatch) {
+    document.getElementById('aiLoadingBar').classList.remove('active');
+    showCardPreview(dbMatch);
+    return;
+  }
+
+  // Fall back to AI lookup (requires hosted environment)
+  const prompt = `You are a credit card rewards database. The user has a card called: "${cardName}"
+
+Return ONLY a JSON object with this exact structure (no markdown, no explanation, just the JSON):
+{
+  "name": "Official full card name",
+  "issuer": "Bank/issuer name",
+  "categories": [
+    {"name": "Category name", "rate": "Reward rate (e.g. 3x points or 5% cash back)"},
+    {"name": "Everything else", "rate": "base rate"}
+  ],
+  "caveats": "One sentence covering annual fee, caps, notable exclusions, or key perks.",
+  "keywords": ["lowercase","keywords","for","bonus","categories"]
+}
+
+If the card doesn't exist or you're not confident, return: {"error": "Card not found"}`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+    const raw = data.content?.[0]?.text || '';
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+
+    document.getElementById('aiLoadingBar').classList.remove('active');
+
+    if (parsed.error) {
+      document.getElementById('aiStatusText').textContent = '⚠ Card not found — try the full official name';
+      return;
+    }
+
+    showCardPreview(parsed);
+
+  } catch(err) {
+    document.getElementById('aiLoadingBar').classList.remove('active');
+    document.getElementById('aiStatusText').textContent = '⚠ Not hosted yet — AI lookup requires GitHub Pages. Common cards like Chase Sapphire, Amex Gold, Citi Strata are already built in!';
+    console.error(err);
+  }
+}
+
+function showCardPreview(parsed) {
+  pendingCard = {
+    id: 'card_' + Date.now(),
+    name: parsed.name,
+    issuer: parsed.issuer,
+    color: getCardColor(myCards.length, parsed.issuer),
+    categories: parsed.categories,
+    caveats: parsed.caveats,
+    keywords: parsed.keywords || []
+  };
+
+  document.getElementById('aiLookupStatus').style.display = 'none';
+  document.getElementById('previewName').textContent = parsed.name;
+  document.getElementById('previewIssuer').textContent = parsed.issuer;
+  document.getElementById('previewIcon').style.background = `linear-gradient(135deg, ${pendingCard.color}33, ${pendingCard.color}11)`;
+
+  const catsHtml = parsed.categories.slice(0, 6).map(c =>
+    `<div class="ai-cat-pill"><span class="ai-cat-name">${c.name}</span><span class="ai-cat-rate">${c.rate}</span></div>`
+  ).join('');
+  document.getElementById('previewCats').innerHTML = catsHtml;
+  document.getElementById('previewCaveats').textContent = parsed.caveats;
+  document.getElementById('aiResultCard').classList.add('visible');
+}
+
+function confirmAddCard() {
+  if (!pendingCard) return;
+
+  // Check duplicate
+  if (myCards.find(c => c.name.toLowerCase() === pendingCard.name.toLowerCase())) {
+    showToast('Card already in your wallet');
+    return;
+  }
+
+  myCards.push(pendingCard);
+  saveCards();
+  pendingCard = null;
+
+  document.getElementById('cardSearchInput').value = '';
+  resetAiLookup();
+  renderMyCardsList();
+  showToast('Card added ✓');
+}
+
+function removeCard(id) {
+  myCards = myCards.filter(c => c.id !== id);
+  saveCards();
+  renderMyCardsList();
+  if (document.getElementById('screen-app').classList.contains('active')) renderApp();
+}
+
+function renderMyCardsList() {
+  const count = myCards.length;
+  document.getElementById('myCardsCount').textContent = count;
+  document.getElementById('addDoneBtn').style.display = count > 0 ? 'block' : 'none';
+
+  const list = document.getElementById('myCardsList');
+  if (count === 0) {
+    list.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 0;">No cards added yet.</div>';
+    return;
+  }
+
+  list.innerHTML = myCards.map((c, i) => `
+    <div class="my-card-item" style="border-color:${c.color}40; background:${c.color}1a;">
+      <div class="my-card-dot" style="background:${c.color}"></div>
+      <div class="my-card-info">
+        <div class="my-card-name" style="color:${c.color}ee;">${c.name}</div>
+        <div class="my-card-cats">${c.categories.slice(0,2).map(x => x.rate).join(' · ')}</div>
+      </div>
+      <button class="btn-remove" onclick="removeCard('${c.id}')">Remove</button>
+    </div>
+  `).join('');
+}
+
+// ─────────────────────────────────────
+// MAIN APP
+// ─────────────────────────────────────
+function renderApp() {
+  const empty = document.getElementById('emptyState');
+  const section = document.getElementById('cardsSection');
+
+  if (myCards.length === 0) {
+    empty.classList.add('visible');
+    section.style.display = 'none';
+    return;
+  }
+
+  empty.classList.remove('visible');
+  section.style.display = 'block';
+
+  const container = document.getElementById('cardBlocksContainer');
+  container.innerHTML = myCards.map((card, i) => `
+    <div class="card-block" id="cb_${card.id}" style="border-color:${card.color}40;">
+      <div class="card-block-header" onclick="toggleCard('cb_${card.id}')" style="background:${card.color}1a;">
+        <div class="card-block-dot" style="background:${card.color}"></div>
+        <div class="card-block-info">
+          <div class="card-block-name" style="color:${card.color}dd;">${card.name}</div>
+          <div class="card-block-top-cat">${card.categories[0]?.rate || ''} on ${card.categories[0]?.name || ''}</div>
+        </div>
+        <div class="card-block-chevron" style="color:${card.color}88;">▼</div>
+      </div>
+      <div class="card-block-body" style="background:${card.color}10; border-top-color:${card.color}18;">
+        ${card.categories.map(c => `
+          <div class="cb-row">
+            <span class="cb-cat">${c.name}</span>
+            <span class="cb-rate" style="color:${card.color}ee;">${c.rate}</span>
+          </div>
+        `).join('')}
+        ${card.caveats ? `<div class="cb-note" style="border-left:2px solid ${card.color}44; padding-left:10px; background:transparent;">${card.caveats}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleCard(id) {
+  const el = document.getElementById(id);
+  const isOpen = el.classList.contains('open');
+  document.querySelectorAll('.card-block').forEach(b => b.classList.remove('open'));
+  if (!isOpen) el.classList.add('open');
+}
+
+// ─────────────────────────────────────
+// SMART LOOKUP
+// ─────────────────────────────────────
+const lookupInput = document.getElementById('lookupInput');
+
+lookupInput.addEventListener('input', function() {
+  const q = this.value.trim();
+  clearTimeout(isLookupDebounce);
+
+  document.getElementById('resultCard').classList.remove('visible');
+  document.getElementById('resultNoCard').classList.remove('visible');
+  document.getElementById('lookupThinking').classList.remove('visible');
+
+  if (!q) return;
+
+  // First try local keyword match (instant)
+  const localMatch = localLookup(q);
+  if (localMatch) {
+    showResult(localMatch);
+    return;
+  }
+
+  // If no local match, use AI for smart matching
+  if (myCards.length > 0) {
+    isLookupDebounce = setTimeout(() => aiLookup(q), 600);
+  } else {
+    document.getElementById('resultNoCard').textContent = 'Add your cards first to get personalized recommendations.';
+    document.getElementById('resultNoCard').classList.add('visible');
+  }
+});
+
+function localLookup(q) {
+  q = q.toLowerCase();
+  let bestCard = null;
+  let bestKeywordMatch = false;
+
+  for (const card of myCards) {
+    for (const kw of card.keywords || []) {
+      if (q.includes(kw) || kw.includes(q)) {
+        // Return the card with its best bonus category
+        const topCat = card.categories[0];
+        return {
+          card,
+          rate: topCat.rate,
+          why: `Best rate in your wallet for this purchase.`
+        };
+      }
+    }
+  }
+  return null;
+}
+
+async function aiLookup(query) {
+  document.getElementById('lookupThinking').classList.add('visible');
+
+  const cardSummary = myCards.map(c =>
+    `${c.name}: ${c.categories.map(cat => `${cat.name}=${cat.rate}`).join(', ')}`
+  ).join('\n');
+
+  const prompt = `A user wants to buy: "${query}"
+
+Their credit cards and reward rates:
+${cardSummary}
+
+Which card should they use? Reply ONLY with JSON:
+{
+  "cardName": "exact card name from the list",
+  "rate": "the specific reward rate for this purchase",
+  "why": "one short sentence explaining why (max 12 words)"
+}
+
+If no card is clearly better, pick the one with the best rate for this purchase type. Always pick one.`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 200,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+    const raw = data.content?.[0]?.text || '';
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+
+    document.getElementById('lookupThinking').classList.remove('visible');
+
+    const card = myCards.find(c => c.name === parsed.cardName) || myCards[0];
+    showResult({ card, rate: parsed.rate, why: parsed.why });
+
+  } catch(err) {
+    document.getElementById('lookupThinking').classList.remove('visible');
+    // fallback: show first card
+    if (myCards.length > 0) {
+      const card = myCards[0];
+      showResult({ card, rate: card.categories[card.categories.length-1]?.rate || '1x', why: 'Default catch-all rate.' });
+    }
+  }
+}
+
+function showResult({ card, rate, why }) {
+  const rc = document.getElementById('resultCard');
+  rc.style.background = card.color + '14';
+  rc.style.border = `1px solid ${card.color}30`;
+
+  document.getElementById('resultDot').style.background = card.color;
+  document.getElementById('resultName').style.color = card.color;
+  document.getElementById('resultName').textContent = card.name;
+  document.getElementById('resultRate').style.color = card.color;
+  document.getElementById('resultRate').textContent = rate;
+  document.getElementById('resultWhy').textContent = why;
+
+  rc.classList.add('visible');
+}
+
+// ─────────────────────────────────────
+// TOAST
+// ─────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ─────────────────────────────────────
+// INIT
+// ─────────────────────────────────────
+loadCards();
+
+if (myCards.length > 0) {
+  renderApp();
+  showScreen('screen-app');
+} else {
+  showScreen('screen-onboard');
+}
+</script>
+</body>
+</html>
